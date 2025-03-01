@@ -88,11 +88,7 @@ export function Bin(props: BinProps) {
   ]);
 
   return (
-    <div
-      key={props.bin.label}
-      className="relative w-[140px] h-[70px] border flex flex-col gap-y-2 select-none"
-      onClick={animateLidsOpen}
-    >
+    <div className="relative w-[140px] h-[70px] border flex flex-col gap-y-2 select-none">
       {/* Box lids hidden behind */}
       <motion.div
         id="left-lid"
