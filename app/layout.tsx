@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import { VT323 } from "next/font/google";
-import { cn } from "@/lib/utils";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Lumon - MDR",

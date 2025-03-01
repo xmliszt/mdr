@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next/eslint-plugin-next": "^15.2.0",
     "@radix-ui/react-slot": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "eslint-plugin-import": "^2.31.0",
     "lucide-react": "^0.477.0",
     "motion": "^12.4.7",
     "next": "15.2.0",
@@ -26,8 +28,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/parser": "^8.25.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
+    "eslint-import-resolver-typescript": "^3.8.3",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
