@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 type BinProgressProps = {
   progress: number;
   color?: string;
@@ -7,24 +5,28 @@ type BinProgressProps = {
 
 export function BinProgress(props: BinProgressProps) {
   return (
-    <div className="h-full w-full bg-background">
+    <div className="relative h-full w-full bg-background">
       <div
-        className="h-full"
+        className="absolute left-0 top-0 h-full"
         style={{
           width: `${Math.min(100, Math.max(0, props.progress * 100))}%`,
-          transition: "width 0.3s ease-in-out",
+          transition: "width 0.5s ease-in-out",
           backgroundColor: props.color ?? "var(--accent-foreground)",
         }}
-      >
-        <span
-          className={cn(
-            "ml-2 font-mono font-bold text-lg",
-            props.progress > 0.2 ? "text-accent" : "text-accent-foreground"
-          )}
+      />
+      <svg className="ml-1 absolute left-0 top-0 h-full w-[50px]">
+        <text
+          x="0"
+          y="55%"
+          className="font-mono font-bold text-base fill-accent"
+          stroke="var(--accent-foreground)"
+          strokeWidth="2"
+          paintOrder="stroke"
+          dominantBaseline="middle"
         >
           {Math.round(props.progress * 100)}%
-        </span>
-      </div>
+        </text>
+      </svg>
     </div>
   );
 }

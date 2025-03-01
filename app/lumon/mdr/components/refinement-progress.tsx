@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 type RefinementProgressProps = {
@@ -53,17 +52,41 @@ export function RefinementProgress(props: RefinementProgressProps) {
         />
       ))}
       {/* Progress text */}
-      <div
-        className={cn(
-          "absolute text-2xl right-12 top-1/2 -translate-y-1/2 font-bold font-mono p-2 truncate max-w-full text-accent"
-        )}
+      <svg
+        width="200px"
+        height="100%"
+        className="absolute truncate right-0 top-1/2 -translate-y-1/2"
       >
-        {Math.round(props.progress * 100)}% Complete
-      </div>
+        <text
+          x="0"
+          y="23"
+          className="font-mono text-2xl font-bold fill-accent"
+          stroke="var(--accent-foreground)"
+          strokeWidth="2"
+          paintOrder="stroke"
+          dominantBaseline="middle"
+        >
+          {Math.round(props.progress * 100)}% Complete
+        </text>
+      </svg>
       {/* File label */}
-      <div className="absolute left-12 top-1/2 -translate-y-1/2 font-mono text-2xl text-accent-foreground">
-        {props.fileLabel}
-      </div>
+      <svg
+        width="100%"
+        height="100%"
+        className="absolute left-12 top-1/2 -translate-y-1/2"
+      >
+        <text
+          x="0"
+          y="23"
+          className="font-mono text-2xl fill-accent"
+          stroke="var(--accent-foreground)"
+          strokeWidth="2"
+          paintOrder="stroke"
+          dominantBaseline="middle"
+        >
+          {props.fileLabel}
+        </text>
+      </svg>
     </div>
   );
 }
