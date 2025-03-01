@@ -1,24 +1,187 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@plugin 'tailwindcss-animate';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(0.145 0.05 240); /* Dark blue background */
+  --foreground: oklch(0.95 0.02 200); /* Light blueish white */
+  --card: oklch(0.145 0.05 240);
+  --card-foreground: oklch(0.95 0.02 200);
+  --popover: oklch(0.145 0.05 240);
+  --popover-foreground: oklch(0.95 0.02 200);
+  --primary: oklch(0.95 0.02 200);
+  --primary-foreground: oklch(0.145 0.05 240);
+  --secondary: oklch(0.269 0.05 240);
+  --secondary-foreground: oklch(0.95 0.02 200);
+  --muted: oklch(0.269 0.05 240);
+  --muted-foreground: oklch(0.708 0.02 200);
+  --accent: oklch(0.269 0.05 240);
+  --accent-foreground: oklch(0.95 0.02 200);
+  --destructive: oklch(0.65 0.2 25.723); /* Brighter destructive color */
+  --destructive-foreground: oklch(
+    0.85 0.25 25.331
+  ); /* Brighter destructive foreground */
+  --border: oklch(0.269 0.05 240);
+  --input: oklch(0.269 0.05 240);
+  --ring: oklch(0.439 0.02 200);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.205 0.05 240);
+  --sidebar-foreground: oklch(0.95 0.02 200);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.95 0.02 200);
+  --sidebar-accent: oklch(0.269 0.05 240);
+  --sidebar-accent-foreground: oklch(0.95 0.02 200);
+  --sidebar-border: oklch(0.269 0.05 240);
+  --sidebar-ring: oklch(0.439 0.02 200);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    text-shadow: 0 0 10px currentColor;
   }
 }
 
-body {
-  color: var(--foreground);
+/**
+ * Font for the logo
+ */
+@font-face {
+  font-family: "Lumon Industries";
+  src: url("data:font/woff2;charset=utf-8;base64,d09GMgABAAAAAAMcAA4AAAAABkgAAALJAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbIBwwBmAARBEICoJAghkLFAABNgIkAyQEIAWEFgc8GxoFyB6D426JpYgoIto/X8Zdy3PqEVRr//bsHX/AAD+wAdZIQgKpVDSTcHHADo0hYYGES+y/nx+X798NZDzAMxJ0VttcLw0MxehrQl6i87/fbeKa/N8gD9hCkeL/C8CIBl/TNAp4QBPN4qLdaPg0ndIGtkv08/PKAgKjgCSEWgi0lsqAduwqqYEgOXQAgdZKeNi438WdcJo0kHGmxaKDjHSA43l5IG1BQbEhP8QjPZRg56dTJwAIVLhHfACmoKe27JwDX0tJDywAxL/kA3owSMgwCyugW/ysBWq1hJ5ytR30lOBf0v221i0KAERHAg2YBkocBh4AkAOAEEIS5Vg7OR53McjNddHtdIc7RwPPta4yjAQCveCTw8eQXzsKmX5wgorrp6Hnrx2HPjxF1+uaTmoajtyh5WqsxMJTqAt+1ZLnBXWVRHjq6AEUeyTfLsDH3uE33KXz37MlPc+c/pTXlp4u4Jv/FhQ+z80JsdKwCGt4A9q7PhZM7q1P+aYU7vTC5P7GpO+K6Flq7/ZuX8/OXk87vepqgFBPuOgWWiV43zal2jI3dbA+dSdclzQ3yhfk8Fsk6wIACASPjQGOI5Hc/0GhNfh2aCOGXEX/b/hnzFnVQUNeIZi21NinGFwTIIK+8aezDaDawF0/u1i9u1iD07VIJ4TGTv4gIQS2AMC0GwGYAgKESdEQSHJ9CGSWyIdAHk8WFhKSpUkN/MnoVBmrsCJvMNBtk6FniExqb8jMZgvjOUQW1rolS71I4k9GpqDgSu6fE6dKrFq97oNzz7nICOmv5txClBPFw/mPG77oFrlMVKy0OLqmsRy00TNwMlHq0s0ii5aSmZmSTpcSVlp6OlkK6bSzMrMwUepgJqan0Y4EjygSHFnjnJzSuJY6HUzq8ZbeWcI6ORmRYkqW0MHKymIIhnMjcNqsBhFJZg0zn4SMWVnPKolEohQAAA==")
+    format("woff2");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+#logo {
+  font-family: "Lumon Industries";
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 2em;
+  letter-spacing: 0.02em;
+  margin-top: 0.5em;
+}
+
+main {
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  background-image: radial-gradient(rgba(25, 65, 100, 1), black 120%);
+  font-family: "VT323", "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 0.8em;
+  font-feature-settings: "cv11";
+}
+
+/*
+ * Scanlines
+ *
+ * Gives the illusion of a CRT screen
+ */
+main::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: repeating-linear-gradient(
+      0deg,
+      rgba(18, 16, 16, 0) 0%,
+      rgba(18, 16, 16, 0) 3%,
+      rgba(0, 0, 0, 0.25) 3.5%,
+      rgba(18, 16, 16, 0) 4%,
+      rgba(18, 16, 16, 0) 35%,
+      rgba(0, 0, 0, 0.25) 35.5%,
+      rgba(18, 16, 16, 0) 36%,
+      rgba(18, 16, 16, 0) 87%,
+      rgba(0, 0, 0, 0.25) 87.5%,
+      rgba(18, 16, 16, 0) 88%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.1),
+      rgba(0, 255, 0, 0.05),
+      rgba(0, 0, 255, 0.1)
+    );
+  z-index: 2;
+  background-size: 100% 200px, 3px 100%;
+  pointer-events: none;
+  animation: scanlines 10s linear infinite;
+}
+
+@keyframes scanlines {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -100%;
+  }
+}
+
+/**
+ * Background noise
+ *
+ * Gives the illusion of a CRT screen
+ */
+main::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
 }
