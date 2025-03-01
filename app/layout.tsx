@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lumon - MDR",
-  description: "Macro Data Refinement | Praise Kier",
+  title: "Work at Lumon",
+  description: "Macro Data Refinement | Work at Lumon | Praise Kier",
 };
 
 type LayoutProps = {
