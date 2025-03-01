@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
 import "@/app/globals.css";
+import { Analytics } from "@vercel/analytics/react";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Work at Lumon",
@@ -15,6 +16,7 @@ export default function RootLayout(props: LayoutProps) {
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <main className="min-h-screen">{props.children}</main>
+        <Analytics />
       </body>
     </html>
   );
