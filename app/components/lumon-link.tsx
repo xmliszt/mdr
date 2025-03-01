@@ -69,7 +69,7 @@ export function LumonLink(props: LumonLinkProps) {
         if (typeof props.redirect !== "string") return;
         router.push(props.redirect);
       }}
-      className="hover:[text-shadow:0_0_12px_rgba(255,255,255,1)] transition-all ease-in-out p-10"
+      className="hover:[text-shadow:0_0_12px_rgba(255,255,255,1)] transition-all ease-in-out p-4"
     >
       <motion.h1
         id="logo"

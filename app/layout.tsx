@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { VT323 } from "next/font/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,18 +6,13 @@ export const metadata: Metadata = {
   description: "Macro Data Refinement | Praise Kier",
 };
 
-const font = VT323({
-  subsets: ["latin"],
-  weight: "400",
-});
-
 type LayoutProps = {
   children: React.ReactNode;
 };
 
 export default function RootLayout(props: LayoutProps) {
   return (
-    <html lang="en" className={font.className} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <main className="min-h-screen">{props.children}</main>
       </body>
