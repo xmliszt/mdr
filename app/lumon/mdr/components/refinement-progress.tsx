@@ -36,7 +36,7 @@ export function RefinementProgress(props: RefinementProgressProps) {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 top-10 h-[46px] ml-4 mr-[155px] border border-accent-foreground flex flex-row-reverse"
+      className="select-none absolute inset-0 top-10 h-[46px] ml-4 mr-[155px] border border-accent-foreground flex flex-row-reverse"
     >
       {Array.from({ length: totalBlocks }).map((_, index) => (
         <div
