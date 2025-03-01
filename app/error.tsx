@@ -15,10 +15,10 @@ export default function Error(props: ErrorProps) {
         <LumonLink redirect="/" />
       </div>
 
-      <h1 className="text-3xl mb-4 text-destructive">
+      <h1 className="text-xl mb-4 text-destructive">
         System Error: Computational Anomaly Detected
       </h1>
-      <p className="text-xl">
+      <p className="text-lg">
         A critical deviation has occurred in the processing matrix. Error code:{" "}
         {props.error.message || "Unknown error"}
       </p>

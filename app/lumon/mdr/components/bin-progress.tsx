@@ -19,10 +19,10 @@ export function BinProgress(props: BinProgressProps) {
         <span
           className={cn(
             "ml-2 font-mono font-bold text-lg",
-            props.progress === 0 ? "text-accent-foreground" : "text-accent"
+            props.progress > 0.2 ? "text-accent" : "text-accent-foreground"
           )}
         >
-          {props.progress * 100}%
+          {Math.round(props.progress * 100)}%
         </span>
       </div>
     </div>
