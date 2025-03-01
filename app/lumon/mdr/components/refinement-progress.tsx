@@ -53,18 +53,19 @@ export function RefinementProgress(props: RefinementProgressProps) {
       ))}
       {/* Progress text */}
       <svg
-        width="200px"
+        width="100%"
         height="100%"
         className="absolute truncate right-0 top-1/2 -translate-y-1/2"
       >
         <text
-          x="0"
+          x="98%"
           y="23"
-          className="font-mono text-2xl font-bold fill-accent"
+          className="font-mono text-2xl font-bold fill-accent text-right"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"
           dominantBaseline="middle"
+          textAnchor="end"
         >
           {Math.round(props.progress * 100)}% Complete
         </text>
@@ -73,7 +74,7 @@ export function RefinementProgress(props: RefinementProgressProps) {
       <svg
         width="100%"
         height="100%"
-        className="absolute left-12 top-1/2 -translate-y-1/2"
+        className="absolute left-4 top-1/2 -translate-y-1/2"
       >
         <text
           x="0"
