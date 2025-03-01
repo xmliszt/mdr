@@ -7,7 +7,7 @@ export class PointerManager {
     y: 0,
   };
 
-  constructor() {
+  addEventListeners() {
     window.addEventListener("pointermove", this._handlePointerMove);
   }
 
@@ -20,5 +20,3 @@ export class PointerManager {
     window.removeEventListener("pointermove", this._handlePointerMove);
   }
 }
-
-export const pointerManager = new PointerManager();

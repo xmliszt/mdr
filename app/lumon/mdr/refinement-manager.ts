@@ -1,10 +1,11 @@
 import { BinData } from "@/app/lumon/mdr/bin-data";
 import { NumberManager } from "@/app/lumon/mdr/number-manager";
-
+import { PointerManager } from "@/app/lumon/mdr/pointer-manager";
 export class RefinementManager {
   private static instance: RefinementManager | null = null;
 
   readonly numberManager: NumberManager;
+  readonly pointerManager: PointerManager;
   readonly bins: ReadonlyArray<BinData>;
 
   private constructor() {
@@ -15,6 +16,7 @@ export class RefinementManager {
     );
 
     this.numberManager = new NumberManager();
+    this.pointerManager = new PointerManager();
   }
 
   static get(): RefinementManager {
@@ -22,6 +24,12 @@ export class RefinementManager {
       RefinementManager.instance = new RefinementManager();
     }
     return RefinementManager.instance;
+  }
+
+  static delete() {
+    if (!RefinementManager.instance) return;
+    RefinementManager.instance.pointerManager.removeEventListeners();
+    RefinementManager.instance = null;
   }
 
   getBinByIndex(index: number): BinData | undefined {

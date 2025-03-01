@@ -1,6 +1,5 @@
 "use client";
 
-import { pointerManager } from "@/app/lumon/mdr/pointer-manager";
 import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { cn } from "@/lib/utils";
@@ -12,7 +11,7 @@ type NumberCellProps = {
 
 export function NumberCell({ cellId }: NumberCellProps) {
   const numberRef = useRef<HTMLSpanElement>(null);
-  const { numberManager } = RefinementManager.get();
+  const { numberManager, pointerManager } = RefinementManager.get();
   const number = numberManager.getNumber(cellId);
 
   const containerPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
@@ -148,7 +147,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
     // Apply the transform directly to the DOM element
     numberRef.current.style.opacity = "100%";
     numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(${scale})`;
-  }, []);
+  }, [pointerManager.pointerPosition.x, pointerManager.pointerPosition.y]);
 
   // When mounted, start moving the number element in the cell container.
   useEffect(() => {
