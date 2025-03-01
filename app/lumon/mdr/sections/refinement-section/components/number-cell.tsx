@@ -170,11 +170,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
       {/* The cell container */}
       <div
         id={cellId}
-        className={cn(
-          "absolute top-0 left-0",
-          // For debug purpose
-          "border border-amber-400/20"
-        )}
+        className="absolute top-0 left-0"
         style={{
           width: GRID_CONFIG.CELL_SIZE,
           height: GRID_CONFIG.CELL_SIZE,
