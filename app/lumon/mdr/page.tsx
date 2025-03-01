@@ -6,7 +6,7 @@ import { RefinementSection } from "@/app/lumon/mdr/sections/refinement-section";
 export default function Page() {
   return (
     <div className="w-full h-full flex flex-col">
-      <HeaderSection progress={0.14} fileLabel="Cold Harbour" />
+      <HeaderSection progress={0} fileLabel="Cold Harbor" />
       <RefinementSection />
       <BinSection />
       <FooterSection />
