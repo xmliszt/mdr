@@ -50,8 +50,8 @@ export function Bin(props: BinProps) {
     // Increase the sheet's height to 100% of its own height
     // Set the sheet's bottom to the top of the bin
     await metricsSheetControls.start({
-      height: "fit-content",
-      transform: "translateY(-100%)",
+      height: "200px",
+      transform: "translateY(-200px)",
     });
   }, [metricsSheetControls]);
 
