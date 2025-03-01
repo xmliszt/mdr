@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { LumonLink } from "./components/lumon-link";
+import { LumonLink } from "@/app/components/lumon-link";
 
 type ErrorProps = {
   error: Error;

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { RefinementProgress } from "../components/refinement-progress";
-import LumonGlobeImage from "../lumon-globe.png";
+import { RefinementProgress } from "@/app/lumon/mdr/components/refinement-progress";
+import LumonGlobeImage from "@/app/lumon/mdr/lumon-globe.png";
 
 type HeaderSectionProps = {
   progress: number;

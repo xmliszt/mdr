@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { motion, useAnimation } from "framer-motion";
 import { sum } from "lodash";
 import { useCallback, useEffect, useState } from "react";
-import { BinData, type BinDataMetrics } from "../bin-data";
-import { BinProgress } from "./bin-progress";
+import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
+import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
 
 export type BinProps = {
   bin: BinData;

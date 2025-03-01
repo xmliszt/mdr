@@ -1,7 +1,7 @@
-import { BinSection } from "./sections/bin-section";
-import { FooterSection } from "./sections/footer-section";
-import { HeaderSection } from "./sections/header-section";
-import { RefinementSection } from "./sections/refinement-section";
+import { BinSection } from "@/app/lumon/mdr/sections/bin-section";
+import { FooterSection } from "@/app/lumon/mdr/sections/footer-section";
+import { HeaderSection } from "@/app/lumon/mdr/sections/header-section";
+import { RefinementSection } from "@/app/lumon/mdr/sections/refinement-section";
 
 export default function Page() {
   return (

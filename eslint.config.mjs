@@ -1,4 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
+import noRelativeImportPathsPlugin from "eslint-plugin-no-relative-import-paths";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -15,6 +16,7 @@ const eslintConfig = [
   {
     plugins: {
       "simple-import-sort": simpleImportSortPlugin,
+      "no-relative-import-paths": noRelativeImportPathsPlugin,
     },
   },
   {
@@ -22,6 +24,16 @@ const eslintConfig = [
       "import/resolver": {
         typescript: {},
       },
+    },
+  },
+  {
+    rules: {
+      "no-relative-import-paths/no-relative-import-paths": [
+        "error",
+        {
+          prefix: "@",
+        },
+      ],
     },
   },
 ];

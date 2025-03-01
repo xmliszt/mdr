@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { motion, useAnimation } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
@@ -7,6 +8,7 @@ import { useCallback, useEffect } from "react";
 type LumonLinkProps = {
   redirect?: string;
   children?: React.ReactNode;
+  disabled?: boolean;
 };
 
 export function LumonLink(props: LumonLinkProps) {
@@ -66,10 +68,14 @@ export function LumonLink(props: LumonLinkProps) {
   return (
     <motion.div
       onClick={() => {
+        if (props.disabled) return;
         if (typeof props.redirect !== "string") return;
         router.push(props.redirect);
       }}
-      className="hover:[text-shadow:0_0_12px_rgba(255,255,255,1)] transition-all ease-in-out p-4"
+      className={cn(
+        "hover:[text-shadow:0_0_12px_rgba(255,255,255,1)] transition-all ease-in-out p-4",
+        props.disabled && "pointer-events-none"
+      )}
     >
       <motion.h1
         id="logo"

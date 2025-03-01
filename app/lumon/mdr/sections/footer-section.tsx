@@ -1,4 +1,4 @@
-import { generateRandomSerial } from "../utils/generate-random-serial";
+import { generateRandomSerial } from "@/app/lumon/mdr/utils/generate-random-serial";
 
 export function FooterSection() {
   return (

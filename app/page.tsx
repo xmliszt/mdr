@@ -1,4 +1,4 @@
-import { LumonLink } from "./components/lumon-link";
+import { LumonLink } from "@/app/components/lumon-link";
 
 export default function Home() {
   return (

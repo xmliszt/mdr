@@ -1,8 +1,10 @@
-import { BinData } from "./bin-data";
+import { BinData } from "@/app/lumon/mdr/bin-data";
+import { NumberManager } from "@/app/lumon/mdr/number-manager";
 
 export class RefinementManager {
   private static instance: RefinementManager | null = null;
 
+  readonly numberManager: NumberManager;
   readonly bins: ReadonlyArray<BinData>;
 
   private constructor() {
@@ -11,6 +13,8 @@ export class RefinementManager {
       { length: 5 },
       (_, index) => new BinData(`0${index + 1}`)
     );
+
+    this.numberManager = new NumberManager();
   }
 
   static get(): RefinementManager {
