@@ -25,12 +25,10 @@ export class BinData {
   increment(metrics: Partial<BinDataMetrics>) {
     this.store.setState((state) => ({
       ...state,
-      ...{
-        wo: state.wo + (metrics.wo ?? 0),
-        fc: state.fc + (metrics.fc ?? 0),
-        dr: state.dr + (metrics.dr ?? 0),
-        ma: state.ma + (metrics.ma ?? 0),
-      },
+      wo: Math.min(1, state.wo + (metrics.wo ?? 0)),
+      fc: Math.min(1, state.fc + (metrics.fc ?? 0)),
+      dr: Math.min(1, state.dr + (metrics.dr ?? 0)),
+      ma: Math.min(1, state.ma + (metrics.ma ?? 0)),
     }));
   }
 

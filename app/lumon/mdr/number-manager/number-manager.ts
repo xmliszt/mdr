@@ -141,6 +141,15 @@ export class NumberManager {
   private _isAssigning = false;
 
   async assignHighlightedNumbersToBin(bin: BinData) {
+    // If the bin is already full, do nothing
+    if (
+      bin.store.getState().wo === 1 &&
+      bin.store.getState().fc === 1 &&
+      bin.store.getState().dr === 1 &&
+      bin.store.getState().ma === 1
+    )
+      return;
+
     if (this._isAssigning) return;
     this._isAssigning = true;
 
