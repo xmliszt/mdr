@@ -3,8 +3,8 @@
 import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
 import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
 import { cn } from "@/lib/utils";
-import { motion, useAnimation } from "framer-motion";
 import { sum } from "lodash";
+import { motion, useAnimate } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
 export type BinProps = {
@@ -13,63 +13,73 @@ export type BinProps = {
 };
 
 export function Bin(props: BinProps) {
-  const [metrics, setMetrics] = useState<BinDataMetrics>(
+  const [displayMetrics, setDisplayMetrics] = useState<BinDataMetrics>(
     props.bin.store.getState()
   );
 
-  const leftLidControls = useAnimation();
-  const rightLidControls = useAnimation();
-  const metricsSheetControls = useAnimation();
+  const [leftLidScope, animateLeftLid] = useAnimate();
+  const [rightLidScope, animateRightLid] = useAnimate();
+  const [metricsSheetScope, animateMetricsSheet] = useAnimate();
 
   const animateLidsOpen = useCallback(async () => {
     // First skew the lids
     await Promise.all([
-      leftLidControls.start({ skewY: -30 }, { duration: 0.5 }),
-      rightLidControls.start({ skewY: 30 }, { duration: 0.5 }),
+      animateLeftLid(leftLidScope.current, { skewY: -30 }, { duration: 0.5 }),
+      animateRightLid(rightLidScope.current, { skewY: 30 }, { duration: 0.5 }),
     ]);
     // Then rotate them
     await Promise.all([
-      leftLidControls.start({ rotateY: -140 }, { duration: 0.5 }),
-      rightLidControls.start({ rotateY: 140 }, { duration: 0.5 }),
+      animateLeftLid(
+        leftLidScope.current,
+        { rotateY: -140 },
+        { duration: 0.5 }
+      ),
+      animateRightLid(
+        rightLidScope.current,
+        { rotateY: 140 },
+        { duration: 0.5 }
+      ),
     ]);
-  }, [leftLidControls, rightLidControls]);
+  }, [animateLeftLid, animateRightLid, leftLidScope, rightLidScope]);
 
   const animateLidsClose = useCallback(async () => {
     // First rotate the lids
     await Promise.all([
-      leftLidControls.start({ rotateY: 0 }, { duration: 0.5 }),
-      rightLidControls.start({ rotateY: 0 }, { duration: 0.5 }),
+      animateLeftLid(leftLidScope.current, { rotateY: 0 }, { duration: 0.5 }),
+      animateRightLid(rightLidScope.current, { rotateY: 0 }, { duration: 0.5 }),
     ]);
     // Then skew them
     await Promise.all([
-      leftLidControls.start({ skewY: 0 }, { duration: 0.5 }),
-      rightLidControls.start({ skewY: 0 }, { duration: 0.5 }),
+      animateLeftLid(leftLidScope.current, { skewY: 0 }, { duration: 0.5 }),
+      animateRightLid(rightLidScope.current, { skewY: 0 }, { duration: 0.5 }),
     ]);
-  }, [leftLidControls, rightLidControls]);
+  }, [animateLeftLid, animateRightLid, leftLidScope, rightLidScope]);
 
   const animateMetricsSheetRise = useCallback(async () => {
     // Increase the sheet's height to 100% of its own height
     // Set the sheet's bottom to the top of the bin
-    await metricsSheetControls.start(
+    await animateMetricsSheet(
+      metricsSheetScope.current,
       {
         height: "180px",
         transform: "translateY(-100%)",
       },
       { duration: 1 }
     );
-  }, [metricsSheetControls]);
+  }, [animateMetricsSheet, metricsSheetScope]);
 
   const animateMetricsSheetWithdraw = useCallback(async () => {
     // Decrease the sheet's height to 100% of the bin's height
     // Set the sheet's bottom to the bottom of the bin
-    await metricsSheetControls.start(
+    await animateMetricsSheet(
+      metricsSheetScope.current,
       {
         height: "100%",
         transform: "translateY(0%)",
       },
       { duration: 1 }
     );
-  }, [metricsSheetControls]);
+  }, [animateMetricsSheet, metricsSheetScope]);
 
   // Subscribe to the bin's store and animate the lid and metrics sheet when metrics change.
   // Animation duration total: 3 seconds.
@@ -79,7 +89,7 @@ export function Bin(props: BinProps) {
       await animateLidsOpen();
       await animateMetricsSheetRise();
       // After animation ends, set the metrics sheet to the new metrics.
-      setMetrics(metrics);
+      setDisplayMetrics(metrics);
       // Wait for the metrics sheet to be fully risen before closing the lid.
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // Then run closing animation to close the lid and withdraw the metrics sheet.
@@ -107,21 +117,21 @@ export function Bin(props: BinProps) {
       {/* Box lids hidden behind */}
       <motion.div
         id="left-lid"
+        ref={leftLidScope}
         className="absolute top-0 left-0 h-4 w-1/2 border-2 border-accent-foreground origin-left"
         initial={{ skewY: 0, rotateY: 0 }}
-        animate={leftLidControls}
       />
       <motion.div
         id="right-lid"
+        ref={rightLidScope}
         className="absolute top-0 right-0 h-4 w-1/2 border-2 border-accent-foreground origin-right"
         initial={{ skewY: 0, rotateY: 0 }}
-        animate={rightLidControls}
       />
 
       {/* Metric sheet */}
       <motion.div
+        ref={metricsSheetScope}
         className="absolute top-0 w-full border-2 border-accent-foreground flex flex-col gap-y-2 bg-background p-1 overflow-hidden"
-        animate={metricsSheetControls}
         initial={{ height: "100%", transform: "translateY(0)" }}
       >
         <div className="border-2 text-lg text-center px-2 py-1 border-accent-foreground">
@@ -131,22 +141,22 @@ export function Bin(props: BinProps) {
           {/* WO */}
           <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">WO</span>{" "}
-            <BinProgress progress={metrics.wo} color="#5eff4d" />
+            <BinProgress progress={displayMetrics.wo} color="#5eff4d" />
           </div>
           {/* FC */}
           <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">FC</span>{" "}
-            <BinProgress progress={metrics.fc} color="#fffe48" />
+            <BinProgress progress={displayMetrics.fc} color="#fffe48" />
           </div>
           {/* DR */}
           <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">DR</span>{" "}
-            <BinProgress progress={metrics.dr} color="#fff9e9" />
+            <BinProgress progress={displayMetrics.dr} color="#fff9e9" />
           </div>
           {/* MA */}
           <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">MA</span>{" "}
-            <BinProgress progress={metrics.ma} color="#75ffff" />
+            <BinProgress progress={displayMetrics.ma} color="#75ffff" />
           </div>
         </div>
       </motion.div>
@@ -161,7 +171,10 @@ export function Bin(props: BinProps) {
           {props.bin.label}
         </div>
         <div className="h-[30px] border-2 border-accent-foreground w-full">
-          <BinProgress progress={sum(Object.values(metrics)) / 4} showLabel />
+          <BinProgress
+            progress={sum(Object.values(displayMetrics)) / 4}
+            showLabel
+          />
         </div>
       </div>
     </div>

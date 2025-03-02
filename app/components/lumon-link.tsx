@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimate } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
@@ -13,11 +13,11 @@ type LumonLinkProps = {
 
 export function LumonLink(props: LumonLinkProps) {
   const router = useRouter();
-  const controls = useAnimation();
+  const [scope, animate] = useAnimate();
 
   const runFlickerAnimation = useCallback(async () => {
     // Initial animation
-    await controls.start({
+    await animate(scope.current, {
       opacity: 1,
       y: 0,
       transition: { duration: 0.75, ease: "easeOut", delay: 0.25 },
@@ -34,11 +34,11 @@ export function LumonLink(props: LumonLinkProps) {
         const flickerIntensity = Math.random();
 
         // Quick flicker sequence
-        await controls.start({
+        await animate(scope.current, {
           opacity: flickerIntensity,
           transition: { duration: 0.1 },
         });
-        await controls.start({
+        await animate(scope.current, {
           opacity: 1,
           transition: { duration: 0.1 },
         });
@@ -46,11 +46,11 @@ export function LumonLink(props: LumonLinkProps) {
         // Sometimes do a double flicker
         if (Math.random() > 0.7) {
           await new Promise((resolve) => setTimeout(resolve, 100));
-          await controls.start({
+          await animate(scope.current, {
             opacity: flickerIntensity,
             transition: { duration: 0.05 },
           });
-          await controls.start({
+          await animate(scope.current, {
             opacity: 1,
             transition: { duration: 0.05 },
           });
@@ -59,7 +59,7 @@ export function LumonLink(props: LumonLinkProps) {
     }
 
     flicker();
-  }, [controls]);
+  }, [animate, scope]);
 
   useEffect(() => {
     runFlickerAnimation();
@@ -79,9 +79,9 @@ export function LumonLink(props: LumonLinkProps) {
     >
       <motion.h1
         id="logo"
+        ref={scope}
         className="select-none !text-[2.5rem]"
         initial={{ opacity: 0, y: -20 }}
-        animate={controls}
       >
         {props.children ?? "Lumon"}
       </motion.h1>

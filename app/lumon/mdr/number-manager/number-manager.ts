@@ -277,11 +277,13 @@ export class NumberManager {
   }
 
   get maxRow() {
-    return Math.max(...this.store.getState().numbers.map((n) => n.row));
+    const numbers = this.store.getState().numbers;
+    return numbers.length > 0 ? Math.max(...numbers.map((n) => n.row)) : 0;
   }
 
   get maxCol() {
-    return Math.max(...this.store.getState().numbers.map((n) => n.col));
+    const numbers = this.store.getState().numbers;
+    return numbers.length > 0 ? Math.max(...numbers.map((n) => n.col)) : 0;
   }
 
   setTemper(row: number, col: number, temper: "WO" | "FC" | "DR" | "MA") {
