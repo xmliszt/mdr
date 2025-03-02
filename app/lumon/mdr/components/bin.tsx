@@ -52,8 +52,8 @@ export function Bin(props: BinProps) {
     // Set the sheet's bottom to the top of the bin
     await metricsSheetControls.start(
       {
-        height: "200px",
-        transform: "translateY(-200px)",
+        height: "180px",
+        transform: "translateY(-100%)",
       },
       { duration: 1 }
     );
@@ -64,7 +64,7 @@ export function Bin(props: BinProps) {
     // Set the sheet's bottom to the bottom of the bin
     await metricsSheetControls.start(
       {
-        height: "0px",
+        height: "100%",
         transform: "translateY(0%)",
       },
       { duration: 1 }
@@ -122,31 +122,31 @@ export function Bin(props: BinProps) {
       <motion.div
         className="absolute top-0 w-full border-2 border-accent-foreground flex flex-col gap-y-2 bg-background p-1 overflow-hidden"
         animate={metricsSheetControls}
-        initial={{ height: "0px", transform: "translateY(0%)" }}
+        initial={{ height: "100%", transform: "translateY(0)" }}
       >
         <div className="border-2 text-lg text-center px-2 py-1 border-accent-foreground">
           {props.bin.label}
         </div>
         <div className="flex flex-col gap-y-1.5 [&>div]:text-lg">
           {/* WO */}
-          <div className="flex gap-x-1 items-center">
+          <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">WO</span>{" "}
-            <BinProgress progress={metrics.wo} color="rgb(57, 255, 20)" />
+            <BinProgress progress={metrics.wo} color="#5eff4d" />
           </div>
           {/* FC */}
-          <div className="flex gap-x-1 items-center">
+          <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">FC</span>{" "}
-            <BinProgress progress={metrics.fc} color="rgb(255, 255, 128)" />
+            <BinProgress progress={metrics.fc} color="#fffe48" />
           </div>
           {/* DR */}
-          <div className="flex gap-x-1 items-center">
+          <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">DR</span>{" "}
-            <BinProgress progress={metrics.dr} color="rgb(180, 100, 255)" />
+            <BinProgress progress={metrics.dr} color="#fff9e9" />
           </div>
           {/* MA */}
-          <div className="flex gap-x-1 items-center">
+          <div className="flex gap-x-1 items-center h-6">
             <span className="font-mono">MA</span>{" "}
-            <BinProgress progress={metrics.ma} color="rgb(173, 216, 230)" />
+            <BinProgress progress={metrics.ma} color="#75ffff" />
           </div>
         </div>
       </motion.div>
@@ -161,7 +161,7 @@ export function Bin(props: BinProps) {
           {props.bin.label}
         </div>
         <div className="h-[30px] border-2 border-accent-foreground w-full">
-          <BinProgress progress={sum(Object.values(metrics)) / 4} />
+          <BinProgress progress={sum(Object.values(metrics)) / 4} showLabel />
         </div>
       </div>
     </div>

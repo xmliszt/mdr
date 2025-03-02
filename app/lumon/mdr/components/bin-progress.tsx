@@ -1,5 +1,6 @@
 type BinProgressProps = {
   progress: number;
+  showLabel?: boolean;
   color?: string;
 };
 
@@ -24,7 +25,7 @@ export function BinProgress(props: BinProgressProps) {
           paintOrder="stroke"
           dominantBaseline="middle"
         >
-          {Math.round(props.progress * 100)}%
+          {props.showLabel ? `${Math.round(props.progress * 100)}%` : ""}
         </text>
       </svg>
     </div>
