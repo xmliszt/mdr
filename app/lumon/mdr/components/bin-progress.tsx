@@ -18,7 +18,7 @@ export function BinProgress(props: BinProgressProps) {
         <text
           x="0"
           y="55%"
-          className="font-mono font-bold text-base fill-accent"
+          className="font-bold text-base fill-accent"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"

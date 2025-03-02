@@ -30,6 +30,7 @@ export function NumberGrid() {
 
   return (
     <div
+      id="number_grid"
       ref={containerRef}
       className="relative w-full h-full overflow-hidden py-[5px]"
     >

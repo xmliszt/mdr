@@ -10,6 +10,7 @@ export type BinDataMetrics = {
 };
 
 export class BinData {
+  readonly binId: string;
   readonly store = create<BinDataMetrics>(() => ({
     wo: 0,
     fc: 0,
@@ -17,12 +18,23 @@ export class BinData {
     ma: 0,
   }));
 
-  constructor(readonly label: string) {}
+  constructor(readonly label: string) {
+    this.binId = `bin_${label}`;
+  }
 
   increment(metrics: Partial<BinDataMetrics>) {
     this.store.setState((state) => ({
       ...state,
-      ...metrics,
+      ...{
+        wo: state.wo + (metrics.wo ?? 0),
+        fc: state.fc + (metrics.fc ?? 0),
+        dr: state.dr + (metrics.dr ?? 0),
+        ma: state.ma + (metrics.ma ?? 0),
+      },
     }));
+  }
+
+  get binElement() {
+    return document.getElementById(this.binId);
   }
 }

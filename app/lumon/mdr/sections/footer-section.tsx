@@ -23,7 +23,7 @@ export function FooterSection() {
 
   return (
     <div className="h-12 flex w-full bg-accent-foreground justify-center items-center select-none">
-      <div className="h-full text-accent font-mono text-lg flex justify-center items-center w-full">
+      <div className="h-full text-accent  text-lg flex justify-center items-center w-full">
         {serial}
       </div>
     </div>

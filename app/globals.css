@@ -85,7 +85,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    text-shadow: 0 0 5px currentColor;
+    text-shadow: 0 0 3.5px currentColor;
   }
 }
 
@@ -114,7 +114,7 @@ main {
   background: var(--background);
   color: var(--foreground);
   background-image: radial-gradient(rgba(25, 65, 100, 1), black 120%);
-  font-family: monospace, "Inter", sans-serif;
+  font-family: "Arial", "Inter", sans-serif;
   font-weight: 600;
   font-size: 0.8em;
   font-feature-settings: "cv11";

@@ -3,7 +3,7 @@
 import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 type NumberCellProps = {
   cellId: string;
@@ -14,20 +14,15 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const { numberManager, pointerManager } = RefinementManager.get();
   const number = numberManager.getNumber(cellId);
 
-  const containerPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Store movement state in refs to avoid re-renders
+  const containerRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const positionRef = useRef({ x: 0, y: 0 });
   const speedRef = useRef({ x: 0, y: 0 });
-  const [initialized, setInitialized] = useState(false);
-
-  // Calculate boundaries only once on initialization
   const boundsRef = useRef({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
 
   // Initialize position and speed once
   useEffect(() => {
-    if (initialized || !numberRef.current) return;
+    if (!numberRef.current) return;
 
     const parent = numberRef.current.parentElement;
     if (!parent) return;
@@ -40,7 +35,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
     } = parent.getBoundingClientRect();
 
     // Store container position for faster pointer calculations
-    containerPositionRef.current = {
+    containerRef.current = {
       x: left + containerWidth / 2,
       y: top + containerHeight / 2,
       width: containerWidth,
@@ -54,6 +49,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
     const minY = 0 - Y_OFFSET + GRID_CONFIG.CELL_INNER_BOUND;
     const maxY = containerHeight - Y_OFFSET - GRID_CONFIG.CELL_INNER_BOUND;
 
+    // Set initial boundaries
     boundsRef.current = { minX, maxX, minY, maxY };
 
     // Set initial position
@@ -69,31 +65,27 @@ export function NumberCell({ cellId }: NumberCellProps) {
     const speedMagnitudeY =
       GRID_CONFIG.NUMBER_MOVEMENT_BASE_SPEED +
       Math.random() * GRID_CONFIG.NUMBER_MOVEMENT_BASE_SPEED;
-
     speedRef.current = {
       x: speedMagnitudeX * (Math.random() > 0.5 ? 1 : -1),
       y: speedMagnitudeY * (Math.random() > 0.5 ? 1 : -1),
     };
 
     // Apply initial position
-    if (numberRef.current) {
-      numberRef.current.style.opacity = "100%";
-      numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(1)`;
-    }
-
-    setInitialized(true);
-  }, [initialized]);
+    if (!numberRef.current) return;
+    numberRef.current.style.opacity = "100%";
+    numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(1)`;
+  }, []);
 
   // Update container position on scroll or resize
   useEffect(() => {
-    if (!initialized || !numberRef.current) return;
+    if (!numberRef.current) return;
 
     const updateContainerPosition = () => {
       const parent = numberRef.current?.parentElement;
       if (!parent) return;
 
       const { width, height, left, top } = parent.getBoundingClientRect();
-      containerPositionRef.current = {
+      containerRef.current = {
         x: left + width / 2,
         y: top + height / 2,
         width,
@@ -108,15 +100,15 @@ export function NumberCell({ cellId }: NumberCellProps) {
       window.removeEventListener("scroll", updateContainerPosition);
       window.removeEventListener("resize", updateContainerPosition);
     };
-  }, [initialized]);
+  }, []);
 
   const animate = useCallback(() => {
     if (!numberRef.current) return;
 
     // Calculate distance from pointer for scale effect
     const distanceFromPointer = Math.sqrt(
-      (pointerManager.pointerPosition.x - containerPositionRef.current.x) ** 2 +
-        (pointerManager.pointerPosition.y - containerPositionRef.current.y) ** 2
+      (pointerManager.pointerPosition.x - containerRef.current.x) ** 2 +
+        (pointerManager.pointerPosition.y - containerRef.current.y) ** 2
     );
 
     const distanceRatio = Math.max(
@@ -128,6 +120,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
       )
     );
     const scale = 1 + distanceRatio * (GRID_CONFIG.MAX_SCALE - 1);
+    const glowIntensity = distanceRatio * 10;
 
     // Update position based on time elapsed
     positionRef.current.x += speedRef.current.x;
@@ -147,6 +140,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
     // Apply the transform directly to the DOM element
     numberRef.current.style.opacity = "100%";
     numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(${scale})`;
+    numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensity}px rgba(255, 255, 255, 0.3))`;
   }, [pointerManager.pointerPosition.x, pointerManager.pointerPosition.y]);
 
   // When mounted, start moving the number element in the cell container.
@@ -168,9 +162,11 @@ export function NumberCell({ cellId }: NumberCellProps) {
     <>
       {/* The cell container */}
       <div
-        id={cellId}
-        className="absolute top-0 left-0"
+        className="overflow-visible"
         style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
           width: GRID_CONFIG.CELL_SIZE,
           height: GRID_CONFIG.CELL_SIZE,
           // Position the cell in the grid.
@@ -178,16 +174,19 @@ export function NumberCell({ cellId }: NumberCellProps) {
             translateX(${number.col * GRID_CONFIG.CELL_SIZE}px)
             translateY(${number.row * GRID_CONFIG.CELL_SIZE}px)
           `,
+          zIndex: 0,
         }}
       >
         {/* The number itself */}
         <span
+          id={cellId}
           ref={numberRef}
           className={cn(
             "absolute top-0 left-0",
             "origin-center",
-            "font-bold font-mono text-foreground text-lg",
-            "will-change-transform opacity-0 transition-all"
+            "font-extrabold font-sans text-foreground text-xl",
+            "will-change-[transform,opacity,filter] opacity-0 transition-all",
+            number.isHighlighted && "text-white"
           )}
         >
           {number.val}

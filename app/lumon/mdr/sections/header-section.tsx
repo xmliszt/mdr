@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { RefinementProgress } from "@/app/lumon/mdr/components/refinement-progress";
 import LumonGlobeImage from "@/app/lumon/mdr/lumon-globe.png";
+import Image from "next/image";
+import Link from "next/link";
 
 type HeaderSectionProps = {
   progress: number;
@@ -26,7 +26,7 @@ export function HeaderSection(props: HeaderSectionProps) {
         className="absolute right-0 cursor-default focus-visible:outline-none"
       >
         <Image
-          className="pointer-events-none rounded-full mix-blend-color-dodge opacity-85 relative z-10"
+          className="pointer-events-none rounded-full mix-blend-screen opacity-100 relative z-10"
           src={LumonGlobeImage}
           alt="Lumon globe"
           width={200}

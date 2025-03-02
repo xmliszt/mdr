@@ -1,14 +1,15 @@
 "use client";
 
+import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
+import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
 import { cn } from "@/lib/utils";
 import { motion, useAnimation } from "framer-motion";
 import { sum } from "lodash";
 import { useCallback, useEffect, useState } from "react";
-import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
-import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
 
 export type BinProps = {
   bin: BinData;
+  onClick: () => void;
 };
 
 export function Bin(props: BinProps) {
@@ -21,12 +22,12 @@ export function Bin(props: BinProps) {
   const metricsSheetControls = useAnimation();
 
   const animateLidsOpen = useCallback(async () => {
-    // First skew the lids
+    // First skew the lids -- 1 second
     await Promise.all([
       leftLidControls.start({ skewY: -30 }),
       rightLidControls.start({ skewY: 30 }),
     ]);
-    // Then rotate them
+    // Then rotate them -- 1 second
     await Promise.all([
       leftLidControls.start({ rotateY: -140 }),
       rightLidControls.start({ rotateY: 140 }),
@@ -34,12 +35,12 @@ export function Bin(props: BinProps) {
   }, [leftLidControls, rightLidControls]);
 
   const animateLidsClose = useCallback(async () => {
-    // First rotate the lids
+    // First rotate the lids -- 1 second
     await Promise.all([
       leftLidControls.start({ rotateY: 0 }),
       rightLidControls.start({ rotateY: 0 }),
     ]);
-    // Then skew them
+    // Then skew them -- 1 second
     await Promise.all([
       leftLidControls.start({ skewY: 0 }),
       rightLidControls.start({ skewY: 0 }),
@@ -49,6 +50,7 @@ export function Bin(props: BinProps) {
   const animateMetricsSheetRise = useCallback(async () => {
     // Increase the sheet's height to 100% of its own height
     // Set the sheet's bottom to the top of the bin
+    // Duration: 1 second
     await metricsSheetControls.start({
       height: "200px",
       transform: "translateY(-200px)",
@@ -58,6 +60,7 @@ export function Bin(props: BinProps) {
   const animateMetricsSheetWithdraw = useCallback(async () => {
     // Decrease the sheet's height to 100% of the bin's height
     // Set the sheet's bottom to the bottom of the bin
+    // Duration: 1 second
     await metricsSheetControls.start({
       height: "0px",
       transform: "translateY(0%)",
@@ -65,18 +68,19 @@ export function Bin(props: BinProps) {
   }, [metricsSheetControls]);
 
   // Subscribe to the bin's store and animate the lid and metrics sheet when metrics change.
+  // Animation duration total: 7 seconds.
   useEffect(() => {
     const unsubscribe = props.bin.store.subscribe(async (metrics) => {
       // When metrics change, animate the lid and rise up the metrics sheet.
-      await animateLidsOpen();
-      await animateMetricsSheetRise();
+      await animateLidsOpen(); // 2 seconds
+      await animateMetricsSheetRise(); // 1 second
       // After animation ends, set the metrics sheet to the new metrics.
       setMetrics(metrics);
       // Wait for the metrics sheet to be fully risen before closing the lid.
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // Then run closing animation to close the lid and withdraw the metrics sheet.
-      await animateMetricsSheetWithdraw();
-      await animateLidsClose();
+      await animateMetricsSheetWithdraw(); // 1 second
+      await animateLidsClose(); // 2 seconds
     });
     return unsubscribe;
   }, [
@@ -88,7 +92,14 @@ export function Bin(props: BinProps) {
   ]);
 
   return (
-    <div className="relative w-[140px] h-[70px] border flex flex-col gap-y-2 select-none">
+    <div
+      id={props.bin.binId}
+      className={cn(
+        "relative w-[140px] h-[70px] border flex flex-col gap-y-2 select-none",
+        "hover:scale-105 transition-all ease-in-out"
+      )}
+      onClick={props.onClick}
+    >
       {/* Box lids hidden behind */}
       <motion.div
         id="left-lid"
@@ -139,7 +150,7 @@ export function Bin(props: BinProps) {
         <div
           className={cn(
             "h-[40px] border-2 border-accent-foreground w-full flex justify-center items-center",
-            "font-mono font-bold text-accent-foreground text-lg bg-background"
+            " font-bold text-accent-foreground text-lg bg-background"
           )}
         >
           {props.bin.label}

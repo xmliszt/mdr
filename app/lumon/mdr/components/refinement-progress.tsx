@@ -35,7 +35,7 @@ export function RefinementProgress(props: RefinementProgressProps) {
   return (
     <div
       ref={containerRef}
-      className="select-none absolute inset-0 top-10 h-[46px] ml-4 mr-[155px] border border-accent-foreground flex flex-row-reverse"
+      className="select-none absolute inset-0 top-10 h-[46px] ml-4 mr-[156px] border-2 border-white flex flex-row-reverse"
     >
       {Array.from({ length: totalBlocks }).map((_, index) => (
         <div
@@ -58,9 +58,9 @@ export function RefinementProgress(props: RefinementProgressProps) {
         className="absolute truncate right-0 top-1/2 -translate-y-1/2"
       >
         <text
-          x="98%"
+          x="88%"
           y="23"
-          className="font-mono text-2xl font-bold fill-accent text-right"
+          className="text-2xl font-bold fill-accent text-right"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"
@@ -79,7 +79,7 @@ export function RefinementProgress(props: RefinementProgressProps) {
         <text
           x="0"
           y="23"
-          className="font-mono text-2xl fill-accent"
+          className=" text-2xl fill-accent"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"

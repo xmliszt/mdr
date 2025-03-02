@@ -8,6 +8,7 @@ import { RefinementSection } from "@/app/lumon/mdr/sections/refinement-section";
 import { useEffect } from "react";
 
 export default function Page() {
+
   useEffect(() => {
     const refinementManager = RefinementManager.get();
     refinementManager.pointerManager.addEventListeners();
@@ -19,7 +20,10 @@ export default function Page() {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <HeaderSection progress={0} fileLabel="Cold Harbor" />
+      <HeaderSection
+        progress={RefinementManager.get().progress()}
+        fileLabel="Cold Harbor"
+      />
       <RefinementSection />
       <BinSection />
       <FooterSection />
