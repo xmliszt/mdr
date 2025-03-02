@@ -130,19 +130,23 @@ export function Bin(props: BinProps) {
         <div className="flex flex-col gap-y-1.5 [&>div]:text-lg">
           {/* WO */}
           <div className="flex gap-x-1 items-center">
-            WO <BinProgress progress={metrics.wo} color="rgb(57, 255, 20)" />
+            <span className="font-mono">WO</span>{" "}
+            <BinProgress progress={metrics.wo} color="rgb(57, 255, 20)" />
           </div>
           {/* FC */}
           <div className="flex gap-x-1 items-center">
-            FC <BinProgress progress={metrics.fc} color="rgb(255, 255, 128)" />
+            <span className="font-mono">FC</span>{" "}
+            <BinProgress progress={metrics.fc} color="rgb(255, 255, 128)" />
           </div>
           {/* DR */}
           <div className="flex gap-x-1 items-center">
-            DR <BinProgress progress={metrics.dr} color="rgb(180, 100, 255)" />
+            <span className="font-mono">DR</span>{" "}
+            <BinProgress progress={metrics.dr} color="rgb(180, 100, 255)" />
           </div>
           {/* MA */}
           <div className="flex gap-x-1 items-center">
-            MA <BinProgress progress={metrics.ma} color="rgb(173, 216, 230)" />
+            <span className="font-mono">MA</span>{" "}
+            <BinProgress progress={metrics.ma} color="rgb(173, 216, 230)" />
           </div>
         </div>
       </motion.div>
@@ -151,7 +155,7 @@ export function Bin(props: BinProps) {
         <div
           className={cn(
             "h-[40px] border-2 border-accent-foreground w-full flex justify-center items-center",
-            " font-bold text-accent-foreground text-lg bg-background"
+            "font-bold text-accent-foreground text-lg bg-background"
           )}
         >
           {props.bin.label}

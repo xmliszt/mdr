@@ -23,7 +23,7 @@ export type MdrNumber = {
   /**
    * "WO" | "FC" | "DR" | "MA"
    */
-  temper: "WO" | "FC" | "DR" | "MA";
+  temper: "WO" | "FC" | "DR" | "MA" | undefined;
   /**
    * True if the cell is highlighted by clicking on it.
    */
@@ -117,12 +117,7 @@ export class NumberManager {
       col,
       val: Math.floor(Math.random() * 10),
       isHighlighted: false,
-      // random assign a temper
-      temper: ["WO", "FC", "DR", "MA"][Math.floor(Math.random() * 4)] as
-        | "WO"
-        | "FC"
-        | "DR"
-        | "MA",
+      temper: undefined,
     };
   }
 
@@ -252,9 +247,7 @@ export class NumberManager {
             ? {
                 ...n,
                 val: Math.floor(Math.random() * 10),
-                temper: ["WO", "FC", "DR", "MA"][
-                  Math.floor(Math.random() * 4)
-                ] as "WO" | "FC" | "DR" | "MA",
+                temper: undefined,
                 isHighlighted: false,
               }
             : n
@@ -287,5 +280,13 @@ export class NumberManager {
 
   get maxCol() {
     return Math.max(...this.store.getState().numbers.map((n) => n.col));
+  }
+
+  setTemper(row: number, col: number, temper: "WO" | "FC" | "DR" | "MA") {
+    this.store.setState(({ numbers: currentNumbers }) => ({
+      numbers: currentNumbers.map((n) =>
+        n.row === row && n.col === col ? { ...n, temper } : n
+      ),
+    }));
   }
 }

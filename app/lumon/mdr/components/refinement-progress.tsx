@@ -58,9 +58,9 @@ export function RefinementProgress(props: RefinementProgressProps) {
         className="absolute truncate right-0 top-1/2 -translate-y-1/2"
       >
         <text
-          x="88%"
+          x="98%"
           y="23"
-          className="text-2xl font-bold fill-accent text-right"
+          className="text-2xl fill-accent text-right font-extrabold"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"
@@ -79,13 +79,13 @@ export function RefinementProgress(props: RefinementProgressProps) {
         <text
           x="0"
           y="23"
-          className=" text-2xl fill-accent"
+          className="font-extrabold text-2xl fill-accent"
           stroke="var(--accent-foreground)"
           strokeWidth="2"
           paintOrder="stroke"
           dominantBaseline="middle"
         >
-          {props.fileLabel}
+          {props.fileLabel.toUpperCase()}
         </text>
       </svg>
     </div>

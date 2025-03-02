@@ -1,6 +1,7 @@
 import { BinData } from "@/app/lumon/mdr/bin-data";
 import { NumberManager } from "@/app/lumon/mdr/number-manager";
 import { PointerManager } from "@/app/lumon/mdr/pointer-manager";
+import { TemperManager } from "@/app/lumon/mdr/temper-manager";
 import { sum } from "lodash";
 import { create } from "zustand";
 export class RefinementManager {
@@ -8,6 +9,7 @@ export class RefinementManager {
 
   readonly numberManager: NumberManager;
   readonly pointerManager: PointerManager;
+  readonly temperManager: TemperManager;
   readonly bins: ReadonlyArray<BinData>;
 
   readonly progress = create<number>(() => 0);
@@ -22,6 +24,9 @@ export class RefinementManager {
 
     this.numberManager = new NumberManager();
     this.pointerManager = new PointerManager();
+    this.temperManager = new TemperManager({
+      numberManager: this.numberManager,
+    });
 
     this._pollingProgressInterval = setInterval(() => {
       this.progress.setState(
@@ -31,10 +36,7 @@ export class RefinementManager {
       );
     }, 1000);
 
-    if (typeof window !== "undefined") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).RefinementManager = RefinementManager;
-    }
+    this.temperManager.startRandomEvent();
   }
 
   static get(): RefinementManager {
@@ -48,6 +50,7 @@ export class RefinementManager {
     if (!RefinementManager.instance) return;
     RefinementManager.instance.pointerManager.removeEventListeners();
     clearInterval(RefinementManager.instance._pollingProgressInterval);
+    RefinementManager.instance.temperManager.stopRandomEvent();
     RefinementManager.instance = null;
   }
 

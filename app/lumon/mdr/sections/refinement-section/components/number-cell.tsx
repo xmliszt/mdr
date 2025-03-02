@@ -145,10 +145,53 @@ export function NumberCell({ cellId }: NumberCellProps) {
 
     // Apply the transform directly to the DOM element
     numberRef.current.style.opacity = "100%";
-    numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(${scale})`;
     numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensity}px rgba(255, 255, 255, 0.3))`;
+
+    const shakeIntensity = (() => {
+      switch (number.temper) {
+        case "WO":
+          return 4;
+        case "FC":
+          return 5;
+        case "DR":
+          return 3;
+        case "MA":
+          return 6;
+        default:
+          return 0;
+      }
+    })();
+
+    const scaleIntensity = (() => {
+      switch (number.temper) {
+        case "WO":
+          return 1;
+        case "FC":
+          return 1.2;
+        case "DR":
+          return 1.1;
+        case "MA":
+          return 1.3;
+        default:
+          return 1;
+      }
+    })();
+
+    // Add shaking effect when number is highlighted
+    // Define shake intensity and generate random shake offset within that range
+    const shakeOffsetX = (Math.random() - 0.5) * shakeIntensity;
+    const shakeOffsetY = (Math.random() - 0.5) * shakeIntensity;
+
+    // Apply shake offset to the current position
+    const shakeAndScaleTransform = `translate(${
+      positionRef.current.x + shakeOffsetX
+    }px, ${positionRef.current.y + shakeOffsetY}px) scale(${
+      scale * scaleIntensity
+    })`;
+    numberRef.current.style.transform = shakeAndScaleTransform;
   }, [
     number.isHighlighted,
+    number.temper,
     pointerManager.pointerPosition.x,
     pointerManager.pointerPosition.y,
   ]);
