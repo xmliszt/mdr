@@ -138,19 +138,29 @@ export class NumberManager {
     });
   }
 
+  private _isAssigning = false;
+
   async assignHighlightedNumbersToBin(bin: BinData) {
+    if (this._isAssigning) return;
+    this._isAssigning = true;
+
     const highlightedNumbers = this.store
       .getState()
-      .numbers.filter((n) => n.isHighlighted);
+      .numbers.filter((n) => n.isHighlighted)
+      .sort((a, b) => a.col - b.col || a.row - b.row);
+    if (highlightedNumbers.length === 0) {
+      this._isAssigning = false;
+      return;
+    }
 
     // Get the number cell elements by id
-    const cellNumberAndParentElements = compact(
+    const numAndCells = compact(
       highlightedNumbers.map((n) => {
-        const cell = document.getElementById(n.id);
+        const num = document.getElementById(n.id);
+        if (!num) return null;
+        const cell = num.parentElement;
         if (!cell) return null;
-        const parent = cell.parentElement;
-        if (!parent) return null;
-        return { cell, parent };
+        return { num, cell };
       })
     );
 
@@ -160,8 +170,8 @@ export class NumberManager {
 
     // Get the center position of the bin
     const binBounds = binElement.getBoundingClientRect();
-    const binCenterX = binBounds.left + binBounds.width / 2;
-    const binCenterY = binBounds.top + 35;
+    const binCenterX = binBounds.x + binBounds.width / 2;
+    const binCenterY = binBounds.y;
 
     // Increment the bin's metrics to start bin's animation:
     // - Entry animation: 3 seconds.
@@ -177,43 +187,46 @@ export class NumberManager {
 
     // Animate the cells to the center of the bin.
     // Step 1: Portal the cells out to the <body>
-    cellNumberAndParentElements.forEach(({ parent }, idx) => {
-      // Remove from current position in DOM
-      const parentParent = parent.parentElement;
-      if (!parentParent) throw new Error(`Parent parent not found`);
-      const parentParentRect = parentParent.getBoundingClientRect();
-      parentParent.removeChild(parent);
+    const gridContainer = document.getElementById("number_grid");
+    if (!gridContainer) throw new Error(`Grid container not found`);
+    const gridContainerRect = gridContainer.getBoundingClientRect();
 
-      // Append to body with fixed positioning
-      document.body.appendChild(parent);
-
+    // Force a reflow to ensure styles are applied immediately
+    numAndCells.forEach(({ cell }, idx) => {
       // Set position to maintain visual position relative to viewport
-      parent.style.left = `${parentParentRect.left}px`;
-      parent.style.top = `${parentParentRect.top}px`;
-      parent.style.position = "fixed";
-      parent.style.zIndex = `${9999 - idx}`;
+      cell.style.left = `${gridContainerRect.left}px`;
+      cell.style.top = `${gridContainerRect.top}px`;
+      cell.style.willChange = "transform,opacity,left,top";
+      cell.style.transition = "";
+      cell.style.position = "fixed";
+      cell.style.zIndex = `${9998 - idx}`;
+
+      // Force a reflow to ensure the styles are applied immediately
+      // This prevents batching of style changes which can cause visual glitches
+      void cell.offsetHeight;
     });
 
     // Step 2: Move the cells to the center of the bin, and scale them to 0.5x:
     await new Promise<void>((resolve) => {
-      cellNumberAndParentElements.forEach(({ parent, cell }) => {
-        parent.style.transition = `all 3s ease-in-out`;
-        parent.style.left = `${binCenterX}px`;
-        parent.style.top = `${binCenterY}px`;
-        parent.style.transform = `translate(0px, 0px) scale(0)`;
-        parent.style.opacity = `0`;
-        cell.style.transition = `all 3s ease-in-out`;
-        cell.style.transform = `translate(
-          ${GRID_CONFIG.CELL_SIZE / 2}px,
-          ${GRID_CONFIG.CELL_SIZE / 2}px
-        ) scale(0)`;
+      numAndCells.forEach(({ cell }) => {
+        cell.style.transition = `all 2s ease-in-out`;
+        cell.style.left = `${binCenterX}px`;
+        cell.style.top = `${binCenterY}px`;
+        cell.style.transform = `translate(0px, 0px)`;
         cell.style.opacity = `0`;
       });
-      setTimeout(() => resolve(), 3000);
+      setTimeout(() => resolve(), 2000);
     });
 
     // Finally, reset the highlighted numbers in the store
     this._resetHighlightedNumbers(highlightedNumbers);
+
+    // Wait for the bin's animation to complete (5 seconds in total)
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 4000);
+    });
+
+    this._isAssigning = false;
   }
 
   /**
@@ -240,31 +253,22 @@ export class NumberManager {
       }));
 
       // 2. Restore each number element to its original position.
-      const cell = document.getElementById(num.id);
+      const numElement = document.getElementById(num.id);
+      if (!numElement) return;
+      const cell = numElement.parentElement;
       if (!cell) return;
-      const parent = cell.parentElement;
-      if (!parent) return;
       // Portal parent back to the grid
-      const numberGrid = document.getElementById("number_grid");
-      if (!numberGrid) throw new Error(`Number grid not found`);
-      const parentParent = parent.parentElement;
-      if (!parentParent) throw new Error(`Parent parent not found`);
-      parentParent.removeChild(parent);
-      numberGrid.appendChild(parent);
-      parent.style.position = "absolute";
-      parent.style.transition = "";
-      parent.style.zIndex = "0";
-      parent.style.left = "0px";
-      parent.style.top = "0px";
-      parent.style.opacity = "100%";
-      parent.style.transform = `translate(
-        ${num.col * GRID_CONFIG.CELL_SIZE}px,
-        ${num.row * GRID_CONFIG.CELL_SIZE}px
-      ) scale(1)`;
-
+      cell.style.position = "absolute";
       cell.style.transition = "";
+      cell.style.zIndex = "0";
+      cell.style.left = "0px";
+      cell.style.top = "0px";
       cell.style.opacity = "100%";
-      cell.style.transform = `translate(0px, 0px) scale(1)`;
+      cell.style.transform = `
+        translateX(${num.col * GRID_CONFIG.CELL_SIZE}px)
+        translateY(${num.row * GRID_CONFIG.CELL_SIZE}px)
+      `;
+      cell.style.willChange = "";
     });
   }
 

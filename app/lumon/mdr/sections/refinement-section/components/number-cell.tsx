@@ -119,7 +119,13 @@ export function NumberCell({ cellId }: NumberCellProps) {
           GRID_CONFIG.POINTER_INFLUENCE_RADIUS
       )
     );
-    const scale = 1 + distanceRatio * (GRID_CONFIG.MAX_SCALE - 1);
+    const scale =
+      // base scale
+      1 +
+      // dynamic scale based on distance from pointer
+      distanceRatio * (GRID_CONFIG.MAX_SCALE - 1) +
+      // if highlighted, scale up
+      (number.isHighlighted ? 0.25 : 0);
     const glowIntensity = distanceRatio * 10;
 
     // Update position based on time elapsed
@@ -141,7 +147,11 @@ export function NumberCell({ cellId }: NumberCellProps) {
     numberRef.current.style.opacity = "100%";
     numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(${scale})`;
     numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensity}px rgba(255, 255, 255, 0.3))`;
-  }, [pointerManager.pointerPosition.x, pointerManager.pointerPosition.y]);
+  }, [
+    number.isHighlighted,
+    pointerManager.pointerPosition.x,
+    pointerManager.pointerPosition.y,
+  ]);
 
   // When mounted, start moving the number element in the cell container.
   useEffect(() => {

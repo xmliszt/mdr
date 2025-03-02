@@ -22,65 +22,69 @@ export function Bin(props: BinProps) {
   const metricsSheetControls = useAnimation();
 
   const animateLidsOpen = useCallback(async () => {
-    // First skew the lids -- 1 second
+    // First skew the lids
     await Promise.all([
-      leftLidControls.start({ skewY: -30 }),
-      rightLidControls.start({ skewY: 30 }),
+      leftLidControls.start({ skewY: -30 }, { duration: 0.5 }),
+      rightLidControls.start({ skewY: 30 }, { duration: 0.5 }),
     ]);
-    // Then rotate them -- 1 second
+    // Then rotate them
     await Promise.all([
-      leftLidControls.start({ rotateY: -140 }),
-      rightLidControls.start({ rotateY: 140 }),
+      leftLidControls.start({ rotateY: -140 }, { duration: 0.5 }),
+      rightLidControls.start({ rotateY: 140 }, { duration: 0.5 }),
     ]);
   }, [leftLidControls, rightLidControls]);
 
   const animateLidsClose = useCallback(async () => {
-    // First rotate the lids -- 1 second
+    // First rotate the lids
     await Promise.all([
-      leftLidControls.start({ rotateY: 0 }),
-      rightLidControls.start({ rotateY: 0 }),
+      leftLidControls.start({ rotateY: 0 }, { duration: 0.5 }),
+      rightLidControls.start({ rotateY: 0 }, { duration: 0.5 }),
     ]);
-    // Then skew them -- 1 second
+    // Then skew them
     await Promise.all([
-      leftLidControls.start({ skewY: 0 }),
-      rightLidControls.start({ skewY: 0 }),
+      leftLidControls.start({ skewY: 0 }, { duration: 0.5 }),
+      rightLidControls.start({ skewY: 0 }, { duration: 0.5 }),
     ]);
   }, [leftLidControls, rightLidControls]);
 
   const animateMetricsSheetRise = useCallback(async () => {
     // Increase the sheet's height to 100% of its own height
     // Set the sheet's bottom to the top of the bin
-    // Duration: 1 second
-    await metricsSheetControls.start({
-      height: "200px",
-      transform: "translateY(-200px)",
-    });
+    await metricsSheetControls.start(
+      {
+        height: "200px",
+        transform: "translateY(-200px)",
+      },
+      { duration: 1 }
+    );
   }, [metricsSheetControls]);
 
   const animateMetricsSheetWithdraw = useCallback(async () => {
     // Decrease the sheet's height to 100% of the bin's height
     // Set the sheet's bottom to the bottom of the bin
-    // Duration: 1 second
-    await metricsSheetControls.start({
-      height: "0px",
-      transform: "translateY(0%)",
-    });
+    await metricsSheetControls.start(
+      {
+        height: "0px",
+        transform: "translateY(0%)",
+      },
+      { duration: 1 }
+    );
   }, [metricsSheetControls]);
 
   // Subscribe to the bin's store and animate the lid and metrics sheet when metrics change.
-  // Animation duration total: 7 seconds.
+  // Animation duration total: 3 seconds.
   useEffect(() => {
     const unsubscribe = props.bin.store.subscribe(async (metrics) => {
       // When metrics change, animate the lid and rise up the metrics sheet.
-      await animateLidsOpen(); // 2 seconds
-      await animateMetricsSheetRise(); // 1 second
+      await animateLidsOpen();
+      await animateMetricsSheetRise();
       // After animation ends, set the metrics sheet to the new metrics.
       setMetrics(metrics);
       // Wait for the metrics sheet to be fully risen before closing the lid.
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // Then run closing animation to close the lid and withdraw the metrics sheet.
-      await animateMetricsSheetWithdraw(); // 1 second
-      await animateLidsClose(); // 2 seconds
+      await animateMetricsSheetWithdraw();
+      await animateLidsClose();
     });
     return unsubscribe;
   }, [
@@ -106,21 +110,18 @@ export function Bin(props: BinProps) {
         className="absolute top-0 left-0 h-4 w-1/2 border-2 border-accent-foreground origin-left"
         initial={{ skewY: 0, rotateY: 0 }}
         animate={leftLidControls}
-        transition={{ duration: 1 }}
       />
       <motion.div
         id="right-lid"
         className="absolute top-0 right-0 h-4 w-1/2 border-2 border-accent-foreground origin-right"
         initial={{ skewY: 0, rotateY: 0 }}
         animate={rightLidControls}
-        transition={{ duration: 1 }}
       />
 
       {/* Metric sheet */}
       <motion.div
         className="absolute top-0 w-full border-2 border-accent-foreground flex flex-col gap-y-2 bg-background p-1 overflow-hidden"
         animate={metricsSheetControls}
-        transition={{ duration: 1 }}
         initial={{ height: "0px", transform: "translateY(0%)" }}
       >
         <div className="border-2 text-lg text-center px-2 py-1 border-accent-foreground">
