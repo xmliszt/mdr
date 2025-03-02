@@ -7,7 +7,7 @@ import { NumberManager } from "@/app/lumon/mdr/number-manager";
  */
 export class TemperManager {
   static readonly CHANCE_OF_EVENT = 0.65;
-  static readonly CHANCE_OF_CHAIN = 0.95;
+  static readonly CHANCE_OF_CHAIN = 0.35;
   static readonly EVENT_INTERVAL = 3000;
 
   private readonly _numberManager: NumberManager;
@@ -32,7 +32,9 @@ export class TemperManager {
     function assignTemper(
       numberManager: NumberManager,
       row: number,
-      col: number
+      col: number,
+      direction: "left" | "right" | "up" | "down",
+      mustChain = false
     ) {
       const number = numberManager.getNumberForPosition(row, col);
       // If the number already has a temper, do not assign a new temper.
@@ -44,34 +46,38 @@ export class TemperManager {
         tempers[Math.floor(Math.random() * tempers.length)];
       numberManager.setTemper(row, col, selectedTemper);
 
-      // There is a 95% chance that this event will chain
-      if (Math.random() > TemperManager.CHANCE_OF_CHAIN) return;
-
       // Choose a random direction for the chain.
       const directions = ["left", "right", "up", "down"] as const;
-      const direction =
-        directions[Math.floor(Math.random() * directions.length)];
+      const availableDirections = directions.filter((d) => d !== direction);
 
-      const nextRow =
-        row + (direction === "up" ? -1 : direction === "down" ? 1 : 0);
-      const nextCol =
-        col + (direction === "left" ? -1 : direction === "right" ? 1 : 0);
+      availableDirections.forEach((d) => {
+        // There is a chance that this event will chain
+        if (Math.random() > TemperManager.CHANCE_OF_CHAIN && !mustChain) return;
 
-      // Out of bounds, stop.
-      if (
-        nextRow < 0 ||
-        nextRow >= numberManager.maxRow ||
-        nextCol < 0 ||
-        nextCol >= numberManager.maxCol
-      )
-        return;
+        // Calculate the next row and column.
+        const nextRow = row + (d === "up" ? -1 : d === "down" ? 1 : 0);
+        const nextCol = col + (d === "left" ? -1 : d === "right" ? 1 : 0);
 
-      // Chain to the next number.
-      assignTemper(numberManager, nextRow, nextCol);
+        // Out of bounds, stop.
+        if (
+          nextRow < 0 ||
+          nextRow >= numberManager.maxRow ||
+          nextCol < 0 ||
+          nextCol >= numberManager.maxCol
+        )
+          return;
+
+        // Chain to the next number.
+        assignTemper(numberManager, nextRow, nextCol, d, false);
+      });
     }
 
     // Assign the temper and start the chain.
-    assignTemper(this._numberManager, row, col);
+    const directions = ["left", "right", "up", "down"] as const;
+    const initialDirection =
+      directions[Math.floor(Math.random() * directions.length)];
+    // First time always chains.
+    assignTemper(this._numberManager, row, col, initialDirection, true);
   }
 
   startRandomEvent() {

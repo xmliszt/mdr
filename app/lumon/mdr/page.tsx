@@ -5,9 +5,11 @@ import { BinSection } from "@/app/lumon/mdr/sections/bin-section";
 import { FooterSection } from "@/app/lumon/mdr/sections/footer-section";
 import { HeaderSection } from "@/app/lumon/mdr/sections/header-section";
 import { RefinementSection } from "@/app/lumon/mdr/sections/refinement-section";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
+  const [fileLabel, setFileLabel] = useState("");
+
   useEffect(() => {
     const refinementManager = RefinementManager.get();
     refinementManager.pointerManager.addEventListeners();
@@ -17,11 +19,15 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    setFileLabel(getRandomFileLabel());
+  }, []);
+
   return (
     <div className="w-full h-full flex flex-col">
       <HeaderSection
         progress={RefinementManager.get().progress()}
-        fileLabel={getRandomFileLabel()}
+        fileLabel={fileLabel}
       />
       <RefinementSection />
       <BinSection />

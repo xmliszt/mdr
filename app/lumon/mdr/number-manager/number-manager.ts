@@ -218,6 +218,7 @@ export class NumberManager {
         cell.style.top = `${binCenterY}px`;
         cell.style.transform = `translate(0px, 0px)`;
         cell.style.opacity = `0`;
+        void cell.offsetHeight;
       });
       setTimeout(() => resolve(), 2000);
     });
@@ -271,6 +272,7 @@ export class NumberManager {
         translateY(${num.row * GRID_CONFIG.CELL_SIZE}px)
       `;
       cell.style.willChange = "";
+      void cell.offsetHeight;
     });
   }
 
