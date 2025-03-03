@@ -15,11 +15,11 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const { numberManager, pointerManager } = refinementManager;
   const number = numberManager.getNumber(cellId);
 
-  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const positionRef = useRef({ x: 0, y: 0 });
   const speedRef = useRef({ x: 0, y: 0 });
   const boundsRef = useRef({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
+  const animationFrameRef = useRef<number | null>(null);
 
   // Initialize position and speed once
   useEffect(() => {
@@ -74,33 +74,8 @@ export function NumberCell({ cellId }: NumberCellProps) {
     // Apply initial position
     if (!numberRef.current) return;
     numberRef.current.style.opacity = "100%";
-    numberRef.current.style.transform = `translate(${positionRef.current.x}px, ${positionRef.current.y}px) scale(1)`;
-  }, []);
-
-  // Update container position on scroll or resize
-  useEffect(() => {
-    if (!numberRef.current) return;
-
-    const updateContainerPosition = () => {
-      const parent = numberRef.current?.parentElement;
-      if (!parent) return;
-
-      const { width, height, left, top } = parent.getBoundingClientRect();
-      containerRef.current = {
-        x: left + width / 2,
-        y: top + height / 2,
-        width,
-        height,
-      };
-    };
-
-    window.addEventListener("scroll", updateContainerPosition);
-    window.addEventListener("resize", updateContainerPosition);
-
-    return () => {
-      window.removeEventListener("scroll", updateContainerPosition);
-      window.removeEventListener("resize", updateContainerPosition);
-    };
+    // HACK: Force browser to use GPU by using translate3d hack.
+    numberRef.current.style.transform = `translate3d(${positionRef.current.x}px, ${positionRef.current.y}px, 0) scale(1)`;
   }, []);
 
   const animate = useCallback(() => {
@@ -180,35 +155,43 @@ export function NumberCell({ cellId }: NumberCellProps) {
 
     // Add shaking effect when number is highlighted
     // Define shake intensity and generate random shake offset within that range
-    const shakeOffsetX = (Math.random() - 0.5) * shakeIntensity;
-    const shakeOffsetY = (Math.random() - 0.5) * shakeIntensity;
+    const shakeOffsetX = (Math.random() - 0.5) * shakeIntensity * 2;
+    const shakeOffsetY = (Math.random() - 0.5) * shakeIntensity * 2;
 
     // Apply shake offset to the current position
-    const shakeAndScaleTransform = `translate(${
+    // Force browser to use GPU by using translate3d hack.
+    const shakeAndScaleTransform = `translate3d(${
       positionRef.current.x + shakeOffsetX
-    }px, ${positionRef.current.y + shakeOffsetY}px) scale(${
+    }px, ${positionRef.current.y + shakeOffsetY}px, 0) scale(${
       scale * scaleIntensity
     })`;
     numberRef.current.style.transform = shakeAndScaleTransform;
-  }, [
-    number.isHighlighted,
-    number.temper,
-    pointerManager.pointerPosition.x,
-    pointerManager.pointerPosition.y,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [number.isHighlighted, number.temper]);
 
   // When mounted, start moving the number element in the cell container.
   useEffect(() => {
-    if (!numberRef.current) return;
+    const numberElement = numberRef.current;
+    if (!numberElement) return;
 
-    // Start the animation loop with a reasonable interval
-    intervalIdRef.current = setInterval(animate, 100);
+    const loop = () => {
+      animate();
+      animationFrameRef.current = requestAnimationFrame(loop);
+    };
+    animationFrameRef.current = requestAnimationFrame(loop);
 
-    // Clean up
     return () => {
-      if (!intervalIdRef.current) return;
-      clearInterval(intervalIdRef.current);
-      intervalIdRef.current = null;
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      // Clean up any ongoing CSS transitions to prevent memory leaks
+      if (!numberElement) return;
+      numberElement.style.transition = "";
+      numberElement.style.transform = "";
+      numberElement.style.filter = "";
+      numberElement.style.opacity = "0";
     };
   }, [animate, cellId]);
 
@@ -239,7 +222,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
             "absolute top-0 left-0",
             "origin-center",
             "font-extrabold font-sans text-foreground text-xl",
-            "will-change-[transform,opacity,filter] opacity-0 transition-all",
+            "will-change-[transform,opacity,filter] opacity-0 duration-300",
             number.isHighlighted && "text-white"
           )}
         >
