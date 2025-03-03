@@ -1,3 +1,5 @@
+"use client";
+
 import { BinData } from "@/app/lumon/mdr/bin-data";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { compact } from "lodash";

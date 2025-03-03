@@ -1,3 +1,5 @@
+"use client"; // Mark this as a Client Component
+
 import { BinData, BinDataMetrics } from "@/app/lumon/mdr/bin-data";
 
 interface ProgressData {
@@ -47,11 +49,6 @@ interface ProgressData {
  *    const savedFiles = await progressSaver.listSavedFiles();
  *    // Returns: ["my_session", "another_session", ...]
  *    ```
- *
- * 5. Delete a saved file:
- *    ```typescript
- *    const success = await progressSaver.deleteProgress("my_session");
- *    ```
  */
 
 export class ProgressSaver {
@@ -67,35 +64,40 @@ export class ProgressSaver {
     this._fileName = fileName;
     this._bins = bins;
 
-    // Initialize DB once and use the promise throughout the class
+    // Only initialize DB on the client
+    if (typeof window === "undefined") return;
     this.dbPromise = this.initDB();
   }
 
   startPeriodicSaving() {
+    if (typeof window === "undefined") return; // Do nothing on server
+    if (!this.dbPromise) return; // Do nothing if DB isn't initialized
+
     if (this._periodicSaverInterval) clearInterval(this._periodicSaverInterval);
-    this._periodicSaverInterval = setInterval(() => {
-      this.saveProgress({
-        fileName: this._fileName,
-        bins: this._bins,
-      });
+    this._periodicSaverInterval = setInterval(async () => {
+      try {
+        await this.saveProgress({
+          fileName: this._fileName,
+          bins: this._bins,
+        });
+      } catch (error) {
+        console.error("Periodic save failed:", error);
+        clearInterval(this._periodicSaverInterval); // Stop on failure
+      }
     }, 1000);
   }
 
   beforeUnmount() {
+    if (typeof window === "undefined") return; // Do nothing on server
     this.saveProgress({
       fileName: this._fileName,
       bins: this._bins,
-    });
-    clearInterval(this._periodicSaverInterval);
+    }).catch((error) => console.error("Unmount save failed:", error));
+    if (this._periodicSaverInterval) clearInterval(this._periodicSaverInterval);
   }
 
   private initDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      if (typeof window === "undefined") {
-        reject(new Error("Window is undefined"));
-        return;
-      }
-
       if (!window.indexedDB) {
         console.error("Your browser doesn't support IndexedDB");
         reject(new Error("IndexedDB not supported"));
@@ -126,7 +128,12 @@ export class ProgressSaver {
   }
 
   private getDB(): Promise<IDBDatabase> {
-    if (!this.dbPromise) this.dbPromise = this.initDB();
+    if (!this.dbPromise) {
+      if (typeof window === "undefined") {
+        return Promise.reject(new Error("Cannot access IndexedDB on server"));
+      }
+      this.dbPromise = this.initDB();
+    }
     return this.dbPromise;
   }
 
@@ -139,7 +146,6 @@ export class ProgressSaver {
       const transaction = db.transaction([this.STORE_NAME], "readwrite");
       const store = transaction.objectStore(this.STORE_NAME);
 
-      // First check if we have existing data
       const getAllRequest = store.getAll();
 
       getAllRequest.onsuccess = () => {
@@ -147,12 +153,10 @@ export class ProgressSaver {
           files: {},
         };
 
-        // Create or update the file entry
         if (!existingData.files[options.fileName]) {
           existingData.files[options.fileName] = { progress: {} };
         }
 
-        // Update bin progress
         options.bins.forEach((bin) => {
           const metrics = bin.store.getState();
           existingData.files[options.fileName].progress[bin.binId] = {
@@ -160,7 +164,6 @@ export class ProgressSaver {
           };
         });
 
-        // Save back to the database
         if (getAllRequest.result[0]) {
           store.put(existingData);
         } else {
@@ -199,7 +202,6 @@ export class ProgressSaver {
           }
 
           const binProgress: { [binId: string]: BinDataMetrics } = {};
-
           Object.entries(data.files[options.fileName].progress).forEach(
             ([binId, binData]) => {
               binProgress[binId] = binData.metrics;

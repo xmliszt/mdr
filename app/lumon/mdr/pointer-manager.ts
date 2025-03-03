@@ -1,3 +1,5 @@
+"use client";
+
 export class PointerManager {
   readonly pointerPosition: {
     x: number;

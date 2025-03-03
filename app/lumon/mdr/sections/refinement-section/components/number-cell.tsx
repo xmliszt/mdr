@@ -1,6 +1,6 @@
 "use client";
 
-import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
+import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
@@ -11,7 +11,8 @@ type NumberCellProps = {
 
 export function NumberCell({ cellId }: NumberCellProps) {
   const numberRef = useRef<HTMLSpanElement>(null);
-  const { numberManager, pointerManager } = RefinementManager.get();
+  const refinementManager = useRefinementManager();
+  const { numberManager, pointerManager } = refinementManager;
   const number = numberManager.getNumber(cellId);
 
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);

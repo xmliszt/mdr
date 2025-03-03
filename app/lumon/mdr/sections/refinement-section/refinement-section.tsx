@@ -1,5 +1,3 @@
-"use client";
-
 import { NumberGrid } from "@/app/lumon/mdr/sections/refinement-section/components/number-grid";
 import { PointerInteractionTrap } from "@/app/lumon/mdr/sections/refinement-section/pointer-interaction-trap";
 export function RefinementSection() {

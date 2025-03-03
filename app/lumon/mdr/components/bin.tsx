@@ -3,9 +3,9 @@
 import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
 import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
 import { cn } from "@/lib/utils";
+import { motion, useAnimate } from "framer-motion";
 import { sum } from "lodash";
-import { motion, useAnimate } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type BinProps = {
   bin: BinData;
@@ -21,13 +21,16 @@ export function Bin(props: BinProps) {
   const [rightLidScope, animateRightLid] = useAnimate();
   const [metricsSheetScope, animateMetricsSheet] = useAnimate();
 
+  // Track mounted state to prevent animations on unmounted components
+  const isMounted = useRef(true);
+
   const animateLidsOpen = useCallback(async () => {
-    // First skew the lids
+    if (!isMounted.current || !leftLidScope.current || !rightLidScope.current)
+      return;
     await Promise.all([
       animateLeftLid(leftLidScope.current, { skewY: -30 }, { duration: 0.5 }),
       animateRightLid(rightLidScope.current, { skewY: 30 }, { duration: 0.5 }),
     ]);
-    // Then rotate them
     await Promise.all([
       animateLeftLid(
         leftLidScope.current,
@@ -43,12 +46,12 @@ export function Bin(props: BinProps) {
   }, [animateLeftLid, animateRightLid, leftLidScope, rightLidScope]);
 
   const animateLidsClose = useCallback(async () => {
-    // First rotate the lids
+    if (!isMounted.current || !leftLidScope.current || !rightLidScope.current)
+      return;
     await Promise.all([
       animateLeftLid(leftLidScope.current, { rotateY: 0 }, { duration: 0.5 }),
       animateRightLid(rightLidScope.current, { rotateY: 0 }, { duration: 0.5 }),
     ]);
-    // Then skew them
     await Promise.all([
       animateLeftLid(leftLidScope.current, { skewY: 0 }, { duration: 0.5 }),
       animateRightLid(rightLidScope.current, { skewY: 0 }, { duration: 0.5 }),
@@ -56,8 +59,7 @@ export function Bin(props: BinProps) {
   }, [animateLeftLid, animateRightLid, leftLidScope, rightLidScope]);
 
   const animateMetricsSheetRise = useCallback(async () => {
-    // Increase the sheet's height to 100% of its own height
-    // Set the sheet's bottom to the top of the bin
+    if (!isMounted.current || !metricsSheetScope.current) return;
     await animateMetricsSheet(
       metricsSheetScope.current,
       {
@@ -69,8 +71,7 @@ export function Bin(props: BinProps) {
   }, [animateMetricsSheet, metricsSheetScope]);
 
   const animateMetricsSheetWithdraw = useCallback(async () => {
-    // Decrease the sheet's height to 100% of the bin's height
-    // Set the sheet's bottom to the bottom of the bin
+    if (!isMounted.current || !metricsSheetScope.current) return;
     await animateMetricsSheet(
       metricsSheetScope.current,
       {
@@ -81,22 +82,27 @@ export function Bin(props: BinProps) {
     );
   }, [animateMetricsSheet, metricsSheetScope]);
 
-  // Subscribe to the bin's store and animate the lid and metrics sheet when metrics change.
-  // Animation duration total: 3 seconds.
+  // Subscribe to the bin's store with cleanup
   useEffect(() => {
-    const unsubscribe = props.bin.store.subscribe(async (metrics) => {
-      // When metrics change, animate the lid and rise up the metrics sheet.
-      await animateLidsOpen();
-      await animateMetricsSheetRise();
-      // After animation ends, set the metrics sheet to the new metrics.
-      setDisplayMetrics(metrics);
-      // Wait for the metrics sheet to be fully risen before closing the lid.
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Then run closing animation to close the lid and withdraw the metrics sheet.
-      await animateMetricsSheetWithdraw();
-      await animateLidsClose();
+    let isCurrent = true; // Local flag to prevent stale updates
+
+    const unsubscribe = props.bin.store.subscribe((metrics) => {
+      if (!isCurrent) return; // Skip if component is unmounted
+
+      (async () => {
+        await animateLidsOpen();
+        await animateMetricsSheetRise();
+        setDisplayMetrics(metrics); // Update state after rise
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await animateMetricsSheetWithdraw();
+        await animateLidsClose();
+      })();
     });
-    return unsubscribe;
+
+    return () => {
+      isCurrent = false; // Mark as unmounted
+      unsubscribe(); // Clean up subscription
+    };
   }, [
     animateLidsOpen,
     animateLidsClose,

@@ -1,12 +1,13 @@
 "use client";
 
-import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
+import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { compact } from "lodash";
 import { useCallback } from "react";
 
 export function PointerInteractionTrap() {
-  const { numberManager } = RefinementManager.get();
+  const refinementManager = useRefinementManager();
+  const { numberManager } = refinementManager;
 
   const highlightCellsInRadius = useCallback(
     (options: { pointerX: number; pointerY: number }) => {

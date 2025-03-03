@@ -1,13 +1,14 @@
 "use client";
 
 import { LumonLink } from "@/app/components/lumon-link";
-import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
+import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import { NumberCell } from "@/app/lumon/mdr/sections/refinement-section/components/number-cell";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 
 export function NumberGrid() {
-  const { numberManager } = RefinementManager.get();
+  const refinementManager = useRefinementManager();
+  const { numberManager } = refinementManager;
   const containerRef = useRef<HTMLDivElement>(null);
   const { numbers } = numberManager.store();
 

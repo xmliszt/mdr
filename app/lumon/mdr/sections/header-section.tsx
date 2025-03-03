@@ -2,22 +2,19 @@
 
 import { RefinementProgress } from "@/app/lumon/mdr/components/refinement-progress";
 import LumonGlobeImage from "@/app/lumon/mdr/lumon-globe.png";
+import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import Image from "next/image";
 import Link from "next/link";
 
-type HeaderSectionProps = {
-  progress: number;
-  fileLabel: string;
-};
+export function HeaderSection() {
+  const refinementManager = useRefinementManager();
+  const progress = refinementManager.progress();
+  const fileLabel = refinementManager.fileName;
 
-export function HeaderSection(props: HeaderSectionProps) {
   return (
     <div className="relative h-32 px-4 w-full flex items-center justify-between">
       {/* Progress Bar */}
-      <RefinementProgress
-        progress={props.progress}
-        fileLabel={props.fileLabel}
-      />
+      <RefinementProgress progress={progress} fileLabel={fileLabel} />
 
       {/* Link */}
       <Link
