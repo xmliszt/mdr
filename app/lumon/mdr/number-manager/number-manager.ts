@@ -1,5 +1,6 @@
 "use client";
 
+import { lumonNopeDialog } from "@/app/components/lumon-nope-dialog";
 import { BinData } from "@/app/lumon/mdr/bin-data";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
 import { compact } from "lodash";
@@ -135,7 +136,7 @@ export class NumberManager {
     });
   }
 
-  private _isAssigning = false;
+  private _assigningBins: { [binId: string]: boolean } = {};
 
   async assignHighlightedNumbersToBin(bin: BinData) {
     // If the bin is already full, do nothing
@@ -144,18 +145,30 @@ export class NumberManager {
       bin.store.getState().fc === 1 &&
       bin.store.getState().dr === 1 &&
       bin.store.getState().ma === 1
-    )
+    ) {
+      lumonNopeDialog.show();
       return;
+    }
 
-    if (this._isAssigning) return;
-    this._isAssigning = true;
+    if (this._assigningBins[bin.binId]) {
+      lumonNopeDialog.show();
+      return;
+    }
 
     const highlightedNumbers = this.store
       .getState()
       .numbers.filter((n) => n.isHighlighted)
       .sort((a, b) => a.col - b.col || a.row - b.row);
+
+    // If there are no highlighted numbers, do nothing
     if (highlightedNumbers.length === 0) {
-      this._isAssigning = false;
+      lumonNopeDialog.show();
+      return;
+    }
+
+    // If highlighted numbers have no tempers, do nothing
+    if (highlightedNumbers.every((n) => n.temper === undefined)) {
+      lumonNopeDialog.show();
       return;
     }
 
@@ -184,6 +197,7 @@ export class NumberManager {
     // - Metrics update animation: 1 second.
     // - Exit animation: 3 seconds.
     // Total: 7 seconds.
+    this._assigningBins[bin.binId] = true;
     bin.increment({
       wo: highlightedNumbers.filter((n) => n.temper === "WO").length / 100,
       fc: highlightedNumbers.filter((n) => n.temper === "FC").length / 100,
@@ -233,7 +247,7 @@ export class NumberManager {
       setTimeout(() => resolve(), 4000);
     });
 
-    this._isAssigning = false;
+    this._assigningBins[bin.binId] = false;
   }
 
   /**
