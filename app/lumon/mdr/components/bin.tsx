@@ -63,8 +63,7 @@ export function Bin(props: BinProps) {
     await animateMetricsSheet(
       metricsSheetScope.current,
       {
-        height: "180px",
-        transform: "translateY(-100%)",
+        height: "200px",
       },
       { duration: 1 }
     );
@@ -75,8 +74,7 @@ export function Bin(props: BinProps) {
     await animateMetricsSheet(
       metricsSheetScope.current,
       {
-        height: "100%",
-        transform: "translateY(0%)",
+        height: "0px",
       },
       { duration: 1 }
     );
@@ -137,8 +135,8 @@ export function Bin(props: BinProps) {
       {/* Metric sheet */}
       <motion.div
         ref={metricsSheetScope}
-        className="absolute top-0 w-full border-2 border-accent-foreground flex flex-col gap-y-2 bg-background p-1 overflow-hidden"
-        initial={{ height: "100%", transform: "translateY(0)" }}
+        className="absolute top-4 w-full border-2 border-accent-foreground flex flex-col gap-y-2 bg-background p-1 overflow-hidden origin-top -translate-y-full"
+        initial={{ height: "0px" }}
       >
         <div className="border-2 text-lg text-center px-2 py-1 border-accent-foreground">
           {props.bin.label}
