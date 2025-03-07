@@ -52,7 +52,6 @@ export class RefinementManager {
       bins: this.bins,
     });
     this.progressSaver.startPeriodicSaving();
-    this.pointerManager.addEventListeners();
     this.temperManager.startRandomEvent();
     this._pollingProgressInterval = setInterval(() => {
       this.progress.setState(
@@ -66,7 +65,6 @@ export class RefinementManager {
   unmount() {
     console.log("RefinementManager#unmount");
     this.progressSaver.beforeUnmount();
-    this.pointerManager.removeEventListeners();
     this.temperManager.stopRandomEvent();
     clearInterval(this._pollingProgressInterval);
   }
