@@ -1,4 +1,4 @@
-import { FileSelector } from "@/app/components/file-selector/file-selector";
+import { FileSelector } from "@/app/lumon/mdr/components/file-selector/file-selector";
 
 export default function Page() {
   return (

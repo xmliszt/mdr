@@ -2,6 +2,10 @@
 
 import { LumonLink } from "@/app/components/lumon-link";
 import { FILES } from "@/app/lumon/mdr/[file_id]/files";
+import {
+  FileProgressSummary,
+  ProgressRetriever,
+} from "@/app/lumon/mdr/components/progress-retriever";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -14,6 +18,9 @@ export function FileSelector() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [gridColumns, setGridColumns] = useState(4); // Default value
+  const [fileProgress, setFileProgress] = useState<FileProgressSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const progressRetrieverRef = useRef<ProgressRetriever | null>(null);
 
   // Sort files alphabetically by name
   const sortedFiles = useMemo(() => {
@@ -31,34 +38,61 @@ export function FileSelector() {
 
   // Detect actual grid columns based on viewport size
   useEffect(() => {
-    const container = containerRef.current;
+    // Initialize progress retriever
+    if (typeof window !== "undefined" && !progressRetrieverRef.current) {
+      progressRetrieverRef.current = new ProgressRetriever();
+
+      // Load file progress
+      const loadProgress = async () => {
+        setIsLoading(true);
+        if (progressRetrieverRef.current) {
+          try {
+            const progress =
+              await progressRetrieverRef.current.getAllFilesProgress();
+            setFileProgress(progress);
+          } catch (error) {
+            console.error("Failed to load progress:", error);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      };
+
+      loadProgress();
+    }
 
     const updateGridColumns = () => {
-      if (!container) return;
+      if (!containerRef.current) return;
 
-      const computedStyle = window.getComputedStyle(container);
-      const gridTemplateColumns = computedStyle.getPropertyValue(
-        "grid-template-columns"
-      );
-      const columnsCount = gridTemplateColumns.split(" ").length;
+      const containerWidth = containerRef.current.offsetWidth;
+      let columns = 1; // Default (mobile)
 
-      setGridColumns(columnsCount);
+      // Match the grid classes in the JSX:
+      // grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5
+      if (containerWidth < 640) columns = 1; // Default (< sm)
+      else if (containerWidth < 768) columns = 2; // sm breakpoint
+      else if (containerWidth < 1024) columns = 3; // md breakpoint
+      else if (containerWidth < 1280) columns = 4; // lg breakpoint
+      else columns = 5; // xl breakpoint
+
+      setGridColumns(columns);
     };
 
     // Initial calculation
     updateGridColumns();
 
     // Update on resize
-    const resizeObserver = new ResizeObserver(updateGridColumns);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      if (!container) return;
-      resizeObserver.disconnect();
-    };
+    window.addEventListener("resize", updateGridColumns);
+    return () => window.removeEventListener("resize", updateGridColumns);
   }, []);
+
+  // Find progress for a specific file
+  const getFileProgress = useCallback(
+    (fileId: string) => {
+      return fileProgress.find((progress) => progress.fileId === fileId);
+    },
+    [fileProgress]
+  );
 
   // Handle click outside to close folders
   useEffect(() => {
@@ -102,47 +136,56 @@ export function FileSelector() {
 
       // Skip keyboard navigation if no folder is selected
       if (selectedIndex === null) return;
-
       if (keyDownEvent.key === "ArrowUp") {
         keyDownEvent.preventDefault();
         // Calculate current row and column
         const currentRow = Math.floor(selectedIndex / gridColumns);
         const currentCol = selectedIndex % gridColumns;
 
-        // Find the total number of rows in this column
-        const totalRows = Math.ceil(filesCount / gridColumns);
+        // Calculate the number of items in this column
+        const lastRowInColumn = Math.floor((filesCount - 1) / gridColumns);
+        console.log(
+          selectedIndex,
+          gridColumns,
+          currentRow,
+          currentCol,
+          lastRowInColumn
+        );
 
-        // Move up one row or wrap to the bottom of the same column
-        const newRow = (currentRow - 1 + totalRows) % totalRows;
-
-        // Calculate the new index
-        const calculatedIndex = newRow * gridColumns + currentCol;
-
-        // Ensure we don't exceed the file count
-        const newIndex =
-          calculatedIndex < filesCount ? calculatedIndex : filesCount - 1;
-
-        setSelectedIndex(newIndex);
+        // Check if there's a row above in the same column
+        if (currentRow > 0) {
+          // Move up one row in the same column
+          setSelectedIndex(selectedIndex - gridColumns);
+        } else {
+          // Wrap to the bottom of the same column
+          // Find the last valid index in this column
+          const lastIndexInColumn = Math.min(
+            lastRowInColumn * gridColumns + currentCol,
+            filesCount - 1
+          );
+          setSelectedIndex(lastIndexInColumn);
+        }
       } else if (keyDownEvent.key === "ArrowDown") {
         keyDownEvent.preventDefault();
         // Calculate current row and column
         const currentRow = Math.floor(selectedIndex / gridColumns);
         const currentCol = selectedIndex % gridColumns;
 
-        // Find the total number of rows in this column
-        const totalRows = Math.ceil(filesCount / gridColumns);
+        // Calculate next index by moving down one row
+        const nextIndex = selectedIndex + gridColumns;
 
-        // Move down one row or wrap to the top of the same column
-        const newRow = (currentRow + 1) % totalRows;
-
-        // Calculate the new index
-        const calculatedIndex = newRow * gridColumns + currentCol;
-
-        // Ensure we don't exceed the file count
-        const newIndex =
-          calculatedIndex < filesCount ? calculatedIndex : currentCol;
-
-        setSelectedIndex(newIndex);
+        // Check if the next index is valid and in the same column
+        if (
+          nextIndex < filesCount &&
+          Math.floor(nextIndex / gridColumns) > currentRow
+        ) {
+          // Move down one row in the same column
+          setSelectedIndex(nextIndex);
+        } else {
+          // Wrap to the top of the same column
+          // Find the first index in this column
+          setSelectedIndex(currentCol);
+        }
       } else if (keyDownEvent.key === "ArrowLeft") {
         keyDownEvent.preventDefault();
         const newIndex = (selectedIndex - 1 + filesCount) % filesCount;
@@ -182,27 +225,36 @@ export function FileSelector() {
     }, 50); // Slightly longer timeout to ensure everything is rendered
 
     return () => clearTimeout(timeoutId);
-  }, [selectedIndex]);
+  }, [selectedIndex, sortedFiles]);
 
   return (
     <div className="relative h-full w-full flex flex-col overflow-hidden gap-y-8">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-50">
+          <div className="text-foreground">Loading progress data...</div>
+        </div>
+      )}
+
       <ScrollArea ref={scrollAreaRef} className="relative h-screen w-full">
         <div
           ref={containerRef}
           className="w-full h-full px-8 py-32 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center"
         >
-          {sortedFiles.map(({ id, name }, index) => {
+          {sortedFiles.map((file, index) => {
+            const progress = getFileProgress(file.id);
+            const completionPercentage = progress?.completionPercentage || 0;
+            const hasProgress = completionPercentage > 0;
             const isSelected = index === selectedIndex;
 
             return (
               <motion.div
-                id={`file-${id}`}
-                key={id}
+                id={`file-${file.id}`}
+                key={file.id}
                 data-folder-item="true"
                 className="w-[200px] h-[200px] overflow-hidden flex items-center justify-center"
                 onClick={() => {
                   if (isSelected) {
-                    handleFileSelect(id);
+                    handleFileSelect(file.id);
                   } else {
                     setSelectedIndex(index);
                   }
@@ -218,10 +270,11 @@ export function FileSelector() {
                   {/* Folder back */}
                   <div
                     className={cn(
-                      "w-[180px] h-[100px] rounded-lg bg-[#173a60]",
+                      "w-[180px] h-[100px] rounded-lg",
                       // Center the folder
                       "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-                      "shadow-[0_0_10px_rgba(0,0,0,0.2)] transition-all duration-200 ease-out"
+                      "shadow-[0_0_10px_rgba(0,0,0,0.2)] transition-all duration-200 ease-out",
+                      hasProgress ? "bg-[#1a4a70]" : "bg-[#173a60]"
                     )}
                   />
 
@@ -246,17 +299,18 @@ export function FileSelector() {
                   >
                     {/* File name */}
                     <div className="absolute top-2 left-2 text-neutral-600 text-xs font-mono [text-shadow:none]">
-                      {id}
+                      {file.id}
                     </div>
                   </motion.div>
 
                   {/* Folder front (opens when selected) */}
                   <motion.div
                     className={cn(
-                      "w-[180px] h-[110px] bg-[#295a8e] rounded-lg",
+                      "w-[180px] h-[110px] rounded-lg",
                       "absolute left-1/2 -translate-x-1/2 bottom-0 origin-bottom",
                       "transition-all duration-200 ease-out",
                       "transform-style-preserve-3d",
+                      hasProgress ? "bg-[#2d6ca8]" : "bg-[#295a8e]",
                       isSelected
                         ? "shadow-[0_-7px_10px_rgba(0,0,0,0.5)]"
                         : "shadow-[0_0px_5px_rgba(0,0,0,0.3)] hover:shadow-[0_-3px_5px_rgba(0,0,0,0.3)]"
@@ -273,9 +327,29 @@ export function FileSelector() {
                     }}
                   >
                     {/* File name */}
-                    <div className="absolute bottom-4 w-full text-center text-white font-bold text-lg">
-                      {name}
+                    <div className="absolute bottom-8 w-full text-center text-white font-bold text-lg">
+                      {file.name}
                     </div>
+
+                    {/* Progress indicator badge */}
+                    {hasProgress && (
+                      <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
+                    )}
+
+                    {/* Progress bar */}
+                    {hasProgress && (
+                      <div className="absolute flex items-center gap-x-1.5 bottom-1.5 left-4 right-4">
+                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden shadow-md">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-amber-300"
+                            style={{ width: `${completionPercentage}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-foreground font-mono">
+                          {Math.round(completionPercentage)}%
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 </div>
               </motion.div>
