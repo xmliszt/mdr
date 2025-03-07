@@ -9,9 +9,9 @@ import { v4 } from "uuid";
  */
 export class TemperManager {
   id = v4();
-  static readonly CHANCE_OF_EVENT = 0.65; // 65% chance to skip event
-  static readonly CHANCE_OF_CHAIN = 0.35;
-  static readonly EVENT_INTERVAL = 3000;
+  static readonly CHANCE_OF_EVENT = 0.4;
+  static readonly CHANCE_OF_CHAIN = 0.4;
+  static readonly EVENT_INTERVAL = 5000;
 
   private readonly _numberManager: NumberManager;
   private _randomEventInterval: NodeJS.Timeout | undefined;
@@ -31,18 +31,13 @@ export class TemperManager {
       return;
     }
 
-    // 65% chance to skip the event
-    if (Math.random() < TemperManager.CHANCE_OF_EVENT) return;
+    // If there are at least 10% of the numbers with a temper, skip the event
+    const { numbers } = this._numberManager.store.getState();
+    const numbersWithTemper = numbers.filter((n) => n.temper);
+    if (numbersWithTemper.length / numbers.length > 0.1) return;
 
-    // Choose a random, valid location (maxRow/maxCol are 0-based max indices)
-    const row = Math.floor(Math.random() * (this._numberManager.maxRow + 1));
-    const col = Math.floor(Math.random() * (this._numberManager.maxCol + 1));
-
-    // Start chaining with a random direction
-    const directions = ["left", "right", "up", "down"] as const;
-    const initialDirection =
-      directions[Math.floor(Math.random() * directions.length)];
-    this._assignTemper(row, col, initialDirection, true);
+    // 60% chance to skip the event
+    if (Math.random() >= TemperManager.CHANCE_OF_EVENT) return;
   }
 
   private _assignTemper(
