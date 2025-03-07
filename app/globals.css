@@ -137,15 +137,12 @@ main::before {
   background: repeating-linear-gradient(
       0deg,
       rgba(18, 16, 16, 0) 0%,
-      rgba(18, 16, 16, 0) 3%,
-      rgba(0, 0, 0, 0.25) 3.5%,
-      rgba(18, 16, 16, 0) 4%,
-      rgba(18, 16, 16, 0) 35%,
-      rgba(0, 0, 0, 0.25) 35.5%,
-      rgba(18, 16, 16, 0) 36%,
-      rgba(18, 16, 16, 0) 87%,
-      rgba(0, 0, 0, 0.25) 87.5%,
-      rgba(18, 16, 16, 0) 88%
+      rgba(18, 16, 16, 0) 42%,
+      rgba(0, 0, 0, 0.15) 42.5%,
+      rgba(18, 16, 16, 0) 43%,
+      rgba(18, 16, 16, 0) 92%,
+      rgba(0, 0, 0, 0.18) 92.3%,
+      rgba(18, 16, 16, 0) 92.8%
     ),
     linear-gradient(
       90deg,
@@ -156,7 +153,7 @@ main::before {
   z-index: 2;
   background-size: 100% 200px, 3px 100%;
   pointer-events: none;
-  animation: scanlines 10s linear infinite;
+  animation: scanlines 30s linear infinite;
 }
 
 @keyframes scanlines {
@@ -181,7 +178,7 @@ main::after {
   left: 0;
   bottom: 0;
   right: 0;
-  background: rgba(18, 16, 16, 0.1);
+  background: rgba(18, 16, 16, 0.05);
   opacity: 0;
   z-index: 2;
   pointer-events: none;
