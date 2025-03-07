@@ -5,4 +5,5 @@ export const GRID_CONFIG = {
   CELL_INNER_BOUND: 20, // px within how much pixels from the edge of the cell the number can move
   POINTER_INFLUENCE_RADIUS: 120, // px the radius within which the pointer can influence the number
   MAX_SCALE: 2.5, // The maximum scale of the number when it is at the center of the cell
+  NAVIGATION_SPEED: 1, // How many cells to move when navigating with arrow keys
 };

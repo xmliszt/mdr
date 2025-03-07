@@ -33,66 +33,80 @@ export type MdrNumber = {
   isHighlighted: boolean;
 };
 
+export type ViewportPosition = {
+  startRow: number;
+  startCol: number;
+};
+
 export class NumberManager {
   /**
    * A grid of numbers, where each number is a MdrNumber
    */
   readonly store = create<{
     numbers: MdrNumber[];
+    viewport: ViewportPosition;
   }>(() => ({
     numbers: [],
+    viewport: { startRow: 0, startCol: 0 },
   }));
 
+  /**
+   * Cache of generated numbers to maintain consistency when revisiting positions
+   */
+  private numberCache: Map<string, MdrNumber> = new Map();
+
+  /**
+   * Generate a unique ID for a cell at a specific position
+   * Format: "r{row}c{col}" to handle negative indices properly
+   */
+  private generateCellId(row: number, col: number): string {
+    return `r${row}c${col}`;
+  }
+
+  /**
+   * Parse a cell ID to extract the row and column
+   * Returns null if the ID format is invalid
+   */
+  private parseCellId(id: string): { row: number; col: number } | null {
+    const match = id.match(/^r(-?\d+)c(-?\d+)$/);
+    if (!match) return null;
+
+    return {
+      row: parseInt(match[1], 10),
+      col: parseInt(match[2], 10),
+    };
+  }
+
   generateNumbers(gridSize: { w: number; h: number }) {
-    const currentNumbers = this.store.getState().numbers;
+    const { viewport } = this.store.getState();
     const colSize = Math.ceil(gridSize.w / GRID_CONFIG.CELL_SIZE);
     const rowSize = Math.ceil(gridSize.h / GRID_CONFIG.CELL_SIZE);
 
-    // If there are no numbers yet, generate the initial grid
-    if (currentNumbers.length === 0) {
-      const newNumbers = Array.from({ length: rowSize }).flatMap((_, row) =>
-        Array.from({ length: colSize }).map((_, col) =>
-          this.generateNewNumberForPosition(row, col)
-        )
-      );
+    // Calculate the visible range based on viewport position
+    const visibleRowStart = viewport.startRow;
+    const visibleRowEnd = viewport.startRow + rowSize - 1;
+    const visibleColStart = viewport.startCol;
+    const visibleColEnd = viewport.startCol + colSize - 1;
 
-      this.store.setState({ numbers: newNumbers });
-      return;
-    }
-
-    // Find the current dimensions
-    const currentColSize =
-      currentNumbers.length > 0
-        ? Math.max(...currentNumbers.map((n) => n.col)) + 1
-        : 0;
-    const currentRowSize =
-      currentNumbers.length > 0
-        ? Math.max(...currentNumbers.map((n) => n.row)) + 1
-        : 0;
-
-    // Create a new array of numbers based on the new dimensions
+    // Create a new array of numbers for the visible area
     const newNumbers: MdrNumber[] = [];
 
-    // Keep existing numbers that are still within bounds
-    newNumbers.push(
-      ...currentNumbers.filter((n) => n.col < colSize && n.row < rowSize)
-    );
+    // Generate numbers for the visible area
+    for (let row = visibleRowStart; row <= visibleRowEnd; row++) {
+      for (let col = visibleColStart; col <= visibleColEnd; col++) {
+        // Calculate the relative position for rendering
+        const relativeRow = row - viewport.startRow;
+        const relativeCol = col - viewport.startCol;
 
-    // Add new numbers for new columns in existing rows
-    if (colSize > currentColSize) {
-      for (let row = 0; row < Math.min(currentRowSize, rowSize); row++) {
-        for (let col = currentColSize; col < colSize; col++) {
-          newNumbers.push(this.generateNewNumberForPosition(row, col));
-        }
-      }
-    }
+        // Generate or retrieve the number for this position
+        const number = this.getOrCreateNumberForPosition(row, col);
 
-    // Add new numbers for new rows
-    if (rowSize > currentRowSize) {
-      for (let row = currentRowSize; row < rowSize; row++) {
-        for (let col = 0; col < colSize; col++) {
-          newNumbers.push(this.generateNewNumberForPosition(row, col));
-        }
+        // Update the relative position for rendering
+        newNumbers.push({
+          ...number,
+          row: relativeRow,
+          col: relativeCol,
+        });
       }
     }
 
@@ -100,22 +114,57 @@ export class NumberManager {
   }
 
   getNumber(id: string) {
+    // First try to find the number in the current viewport
     const n = this.store.getState().numbers.find((n) => n.id === id);
-    if (!n) throw new Error(`Number not found for id: ${id}`);
-    return n;
+    if (n) return n;
+
+    // If not found, try to parse the ID to get the absolute position
+    const position = this.parseCellId(id);
+    if (!position) throw new Error(`Invalid number ID format: ${id}`);
+
+    // Get the number from the cache or create a new one
+    return this.getOrCreateNumberForPosition(position.row, position.col);
   }
 
   getNumberForPosition(row: number, col: number) {
+    // row and col are already relative to the current viewport
+    // so we can use them directly to find the number in the current numbers array
     const n = this.store
       .getState()
       .numbers.find((n) => n.row === row && n.col === col);
+
     if (!n) throw new Error(`Number not found for position: ${row}, ${col}`);
     return n;
   }
 
+  getAbsolutePosition(
+    relativeRow: number,
+    relativeCol: number
+  ): { row: number; col: number } {
+    const { viewport } = this.store.getState();
+    return {
+      row: relativeRow + viewport.startRow,
+      col: relativeCol + viewport.startCol,
+    };
+  }
+
+  getOrCreateNumberForPosition(row: number, col: number): MdrNumber {
+    const cacheKey = this.generateCellId(row, col);
+
+    // Check if we already have this number in the cache
+    if (this.numberCache.has(cacheKey)) {
+      return this.numberCache.get(cacheKey)!;
+    }
+
+    // Generate a new number and store it in the cache
+    const newNumber = this.generateNewNumberForPosition(row, col);
+    this.numberCache.set(cacheKey, newNumber);
+    return newNumber;
+  }
+
   generateNewNumberForPosition(row: number, col: number): MdrNumber {
     return {
-      id: `${row}-${col}`,
+      id: this.generateCellId(row, col),
       row,
       col,
       val: Math.floor(Math.random() * 10),
@@ -125,6 +174,8 @@ export class NumberManager {
   }
 
   highlightNumbers(numbers: MdrNumber[]) {
+    // The numbers passed in are already in the current viewport's coordinate system
+    // so we can directly update their highlight state
     this.store.setState({
       numbers: this.store
         .getState()
@@ -134,6 +185,51 @@ export class NumberManager {
             : { ...n, isHighlighted: false }
         ),
     });
+  }
+
+  /**
+   * Move the viewport in the specified direction
+   */
+  moveViewport(direction: "up" | "down" | "left" | "right") {
+    const { viewport } = this.store.getState();
+
+    let newViewport: ViewportPosition;
+
+    switch (direction) {
+      case "up":
+        newViewport = {
+          ...viewport,
+          startRow: viewport.startRow - GRID_CONFIG.NAVIGATION_SPEED,
+        };
+        break;
+      case "down":
+        newViewport = {
+          ...viewport,
+          startRow: viewport.startRow + GRID_CONFIG.NAVIGATION_SPEED,
+        };
+        break;
+      case "left":
+        newViewport = {
+          ...viewport,
+          startCol: viewport.startCol - GRID_CONFIG.NAVIGATION_SPEED,
+        };
+        break;
+      case "right":
+        newViewport = {
+          ...viewport,
+          startCol: viewport.startCol + GRID_CONFIG.NAVIGATION_SPEED,
+        };
+        break;
+    }
+
+    this.store.setState({ viewport: newViewport });
+
+    // Regenerate the numbers for the new viewport
+    const numberGrid = document.getElementById("number_grid");
+    if (numberGrid) {
+      const { width, height } = numberGrid.getBoundingClientRect();
+      this.generateNumbers({ w: width, h: height });
+    }
   }
 
   private _assigningBins: { [binId: string]: boolean } = {};
@@ -293,13 +389,21 @@ export class NumberManager {
   }
 
   get maxRow() {
-    const numbers = this.store.getState().numbers;
-    return numbers.length > 0 ? Math.max(...numbers.map((n) => n.row)) : 0;
+    const { numbers } = this.store.getState();
+    const relativeMaxRow =
+      numbers.length > 0 ? Math.max(...numbers.map((n) => n.row)) : 0;
+    return relativeMaxRow;
   }
 
   get maxCol() {
-    const numbers = this.store.getState().numbers;
-    return numbers.length > 0 ? Math.max(...numbers.map((n) => n.col)) : 0;
+    const { numbers } = this.store.getState();
+    const relativeMaxCol =
+      numbers.length > 0 ? Math.max(...numbers.map((n) => n.col)) : 0;
+    return relativeMaxCol;
+  }
+
+  get viewportPosition(): ViewportPosition {
+    return this.store.getState().viewport;
   }
 
   setTemper(row: number, col: number, temper: "WO" | "FC" | "DR" | "MA") {
@@ -308,5 +412,16 @@ export class NumberManager {
         n.row === row && n.col === col ? { ...n, temper } : n
       ),
     }));
+
+    // Also update the cache
+    const { viewport } = this.store.getState();
+    const absoluteRow = row + viewport.startRow;
+    const absoluteCol = col + viewport.startCol;
+    const cacheKey = this.generateCellId(absoluteRow, absoluteCol);
+
+    if (this.numberCache.has(cacheKey)) {
+      const cachedNumber = this.numberCache.get(cacheKey)!;
+      this.numberCache.set(cacheKey, { ...cachedNumber, temper });
+    }
   }
 }

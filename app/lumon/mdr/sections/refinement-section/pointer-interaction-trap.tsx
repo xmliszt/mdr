@@ -2,27 +2,46 @@
 
 import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
-import { compact } from "lodash";
-import { useCallback } from "react";
+import { compact, throttle } from "lodash";
+import { useCallback, useEffect, useMemo } from "react";
 
 export function PointerInteractionTrap() {
   const refinementManager = useRefinementManager();
-  const { numberManager } = refinementManager;
+  const { numberManager, pointerManager } = refinementManager;
+
+  // Update grid rect on mount and when window resizes
+  useEffect(() => {
+    const updateGridRect = () => {
+      const numberGrid = document.getElementById("number_grid");
+      if (numberGrid) {
+        const rect = numberGrid.getBoundingClientRect();
+        pointerManager.updateGridRect(rect);
+      }
+    };
+
+    // Initial update
+    updateGridRect();
+
+    // Update on resize
+    window.addEventListener("resize", updateGridRect);
+    return () => {
+      window.removeEventListener("resize", updateGridRect);
+    };
+  }, [pointerManager]);
 
   const highlightCellsInRadius = useCallback(
     (options: { pointerX: number; pointerY: number }) => {
-      const numberGrid = document.getElementById("number_grid");
-      if (!numberGrid) return;
+      const gridRect = pointerManager.store.getState().gridRect;
+      if (!gridRect) return;
 
-      const gridRect = numberGrid.getBoundingClientRect();
       const gridX = gridRect.left;
       const gridY = gridRect.top;
 
-      // Calculate the center cell
-      const centerCellRow = Math.floor(
+      // Calculate the center cell in relative coordinates
+      const relativeRow = Math.floor(
         (options.pointerY - gridY) / GRID_CONFIG.CELL_SIZE
       );
-      const centerCellCol = Math.floor(
+      const relativeCol = Math.floor(
         (options.pointerX - gridX) / GRID_CONFIG.CELL_SIZE
       );
 
@@ -35,10 +54,10 @@ export function PointerInteractionTrap() {
       const cellsInRadius = compact(
         Array.from({ length: radiusCells * 2 + 1 }, (_, rowOffset) =>
           Array.from({ length: radiusCells * 2 + 1 }, (_, colOffset) => {
-            const row = centerCellRow - radiusCells + rowOffset;
-            const col = centerCellCol - radiusCells + colOffset;
+            const row = relativeRow - radiusCells + rowOffset;
+            const col = relativeCol - radiusCells + colOffset;
 
-            // Skip invalid positions
+            // Skip invalid positions (only check relative bounds)
             if (row < 0 || col < 0) return undefined;
             if (row > numberManager.maxRow || col > numberManager.maxCol)
               return undefined;
@@ -70,8 +89,30 @@ export function PointerInteractionTrap() {
       // Highlight the cells that are not already highlighted
       numberManager.highlightNumbers(cellsInRadius);
     },
-    [numberManager]
+    [numberManager, pointerManager]
   );
+
+  // Handle pointer move to update pointer position
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      // Update the pointer position in the store
+      pointerManager.updatePointerPosition(e.clientX, e.clientY);
+    },
+    [pointerManager]
+  );
+
+  // Use useMemo to create a stable throttled function
+  const throttledPointerMove = useMemo(
+    () => throttle(handlePointerMove, 16), // ~60fps
+    [handlePointerMove]
+  );
+
+  // Clean up the throttled function on unmount
+  useEffect(() => {
+    return () => {
+      throttledPointerMove.cancel();
+    };
+  }, [throttledPointerMove]);
 
   const handleOnClick = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) =>
@@ -83,6 +124,7 @@ export function PointerInteractionTrap() {
     <div
       className="absolute inset-0 w-full h-full z-[9999]"
       onClick={handleOnClick}
+      onPointerMove={throttledPointerMove}
     />
   );
 }

@@ -20,6 +20,8 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const speedRef = useRef({ x: 0, y: 0 });
   const boundsRef = useRef({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
   const animationFrameRef = useRef<number | null>(null);
+  const scaleRef = useRef(1);
+  const glowIntensityRef = useRef(0);
 
   // Initialize position and speed once
   useEffect(() => {
@@ -81,28 +83,43 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const animate = useCallback(() => {
     if (!numberRef.current) return;
 
-    // Calculate distance from pointer for scale effect
-    const distanceFromPointer = Math.sqrt(
-      (pointerManager.pointerPosition.x - containerRef.current.x) ** 2 +
-        (pointerManager.pointerPosition.y - containerRef.current.y) ** 2
-    );
+    // Calculate scale based on pointer position
+    const pointerState = pointerManager.store.getState();
+    const gridRect = pointerState.gridRect;
 
-    const distanceRatio = Math.max(
-      0,
-      Math.min(
-        1,
-        (GRID_CONFIG.POINTER_INFLUENCE_RADIUS - distanceFromPointer) /
-          GRID_CONFIG.POINTER_INFLUENCE_RADIUS
-      )
-    );
-    const scale =
-      // base scale
-      1 +
-      // dynamic scale based on distance from pointer
-      distanceRatio * (GRID_CONFIG.MAX_SCALE - 1) +
-      // if highlighted, scale up
-      (number.isHighlighted ? 0.25 : 0);
-    const glowIntensity = distanceRatio * 10;
+    if (gridRect) {
+      // Calculate the cell's center position in screen coordinates
+      const cellCenterX =
+        gridRect.left + (number.col + 0.5) * GRID_CONFIG.CELL_SIZE;
+      const cellCenterY =
+        gridRect.top + (number.row + 0.5) * GRID_CONFIG.CELL_SIZE;
+
+      // Calculate distance from pointer to cell center
+      const distanceFromPointer = Math.sqrt(
+        Math.pow(pointerState.x - cellCenterX, 2) +
+          Math.pow(pointerState.y - cellCenterY, 2)
+      );
+
+      // Calculate scale based on distance
+      const distanceRatio = Math.max(
+        0,
+        Math.min(
+          1,
+          (GRID_CONFIG.POINTER_INFLUENCE_RADIUS - distanceFromPointer) /
+            GRID_CONFIG.POINTER_INFLUENCE_RADIUS
+        )
+      );
+
+      scaleRef.current =
+        // base scale
+        1 +
+        // dynamic scale based on distance from pointer
+        distanceRatio * (GRID_CONFIG.MAX_SCALE - 1) +
+        // if highlighted, scale up
+        (number.isHighlighted ? 0.25 : 0);
+
+      glowIntensityRef.current = distanceRatio * 10;
+    }
 
     // Update position based on time elapsed
     positionRef.current.x += speedRef.current.x;
@@ -121,7 +138,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
 
     // Apply the transform directly to the DOM element
     numberRef.current.style.opacity = "100%";
-    numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensity}px rgba(255, 255, 255, 0.3))`;
+    numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensityRef.current}px rgba(255, 255, 255, 0.3))`;
 
     const shakeIntensity = (() => {
       switch (number.temper) {
@@ -163,11 +180,16 @@ export function NumberCell({ cellId }: NumberCellProps) {
     const shakeAndScaleTransform = `translate3d(${
       positionRef.current.x + shakeOffsetX
     }px, ${positionRef.current.y + shakeOffsetY}px, 0) scale(${
-      scale * scaleIntensity
+      scaleRef.current * scaleIntensity
     })`;
     numberRef.current.style.transform = shakeAndScaleTransform;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [number.isHighlighted, number.temper]);
+  }, [
+    number.isHighlighted,
+    number.temper,
+    number.row,
+    number.col,
+    pointerManager,
+  ]);
 
   // When mounted, start moving the number element in the cell container.
   useEffect(() => {

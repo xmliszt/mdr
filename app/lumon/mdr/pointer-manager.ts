@@ -1,27 +1,33 @@
 "use client";
 
-import { throttle } from "lodash";
+import { create } from "zustand";
+
+type PointerState = {
+  x: number;
+  y: number;
+  gridRect: DOMRect | null;
+};
 
 export class PointerManager {
-  readonly pointerPosition: {
-    x: number;
-    y: number;
-  } = {
+  readonly store = create<PointerState>(() => ({
     x: 0,
     y: 0,
-  };
+    gridRect: null,
+  }));
+
+  updatePointerPosition(x: number, y: number) {
+    this.store.setState({ x, y });
+  }
+
+  updateGridRect(rect: DOMRect) {
+    this.store.setState({ gridRect: rect });
+  }
 
   addEventListeners() {
-    window.addEventListener("pointermove", this._handlePointerMoveThrottled);
+    // We'll handle pointer events in the PointerInteractionTrap component
   }
-  private _handlePointerMove = (e: PointerEvent) => {
-    this.pointerPosition.x = e.clientX;
-    this.pointerPosition.y = e.clientY;
-  };
-
-  private _handlePointerMoveThrottled = throttle(this._handlePointerMove, 100);
 
   removeEventListeners() {
-    window.removeEventListener("pointermove", this._handlePointerMoveThrottled);
+    // We'll handle pointer events in the PointerInteractionTrap component
   }
 }
