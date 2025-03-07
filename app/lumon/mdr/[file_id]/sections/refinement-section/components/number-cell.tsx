@@ -1,7 +1,7 @@
 "use client";
 
-import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
-import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
+import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
+import { GRID_CONFIG } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/grid-config";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 

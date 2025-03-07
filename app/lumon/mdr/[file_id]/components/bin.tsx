@@ -1,7 +1,10 @@
 "use client";
 
-import { BinData, type BinDataMetrics } from "@/app/lumon/mdr/bin-data";
-import { BinProgress } from "@/app/lumon/mdr/components/bin-progress";
+import {
+  BinData,
+  type BinDataMetrics,
+} from "@/app/lumon/mdr/[file_id]/bin-data";
+import { BinProgress } from "@/app/lumon/mdr/[file_id]/components/bin-progress";
 import { cn } from "@/lib/utils";
 import { motion, useAnimate } from "framer-motion";
 import { sum } from "lodash";

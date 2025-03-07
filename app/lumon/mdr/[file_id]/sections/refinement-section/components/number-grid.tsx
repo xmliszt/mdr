@@ -1,8 +1,8 @@
 "use client";
 
 import { LumonLink } from "@/app/components/lumon-link";
-import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
-import { NumberCell } from "@/app/lumon/mdr/sections/refinement-section/components/number-cell";
+import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
+import { NumberCell } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/components/number-cell";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 

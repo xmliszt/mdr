@@ -1,8 +1,8 @@
 "use client";
 
 import { lumonNopeDialog } from "@/app/components/lumon-nope-dialog";
-import { BinData } from "@/app/lumon/mdr/bin-data";
-import { GRID_CONFIG } from "@/app/lumon/mdr/sections/refinement-section/grid-config";
+import { BinData } from "@/app/lumon/mdr/[file_id]/bin-data";
+import { GRID_CONFIG } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/grid-config";
 import { compact } from "lodash";
 import { create } from "zustand";
 

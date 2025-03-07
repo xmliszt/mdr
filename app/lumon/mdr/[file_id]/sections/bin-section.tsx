@@ -1,7 +1,7 @@
 "use client";
 
-import { Bin } from "@/app/lumon/mdr/components/bin";
-import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
+import { Bin } from "@/app/lumon/mdr/[file_id]/components/bin";
+import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
 
 export function BinSection() {
   const refinementManager = useRefinementManager();

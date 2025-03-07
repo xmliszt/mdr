@@ -1,15 +1,19 @@
 "use client";
 
-import { BinData } from "@/app/lumon/mdr/bin-data";
-import { NumberManager } from "@/app/lumon/mdr/number-manager";
-import { PointerManager } from "@/app/lumon/mdr/pointer-manager";
-import { ProgressSaver } from "@/app/lumon/mdr/progress-saver";
-import { TemperManager } from "@/app/lumon/mdr/temper-manager";
+import { BinData } from "@/app/lumon/mdr/[file_id]/bin-data";
+import { NumberManager } from "@/app/lumon/mdr/[file_id]/number-manager";
+import { PointerManager } from "@/app/lumon/mdr/[file_id]/pointer-manager";
+import { ProgressSaver } from "@/app/lumon/mdr/[file_id]/progress-saver";
+import { TemperManager } from "@/app/lumon/mdr/[file_id]/temper-manager";
 import { sum } from "lodash";
 import { create } from "zustand";
 
+type RefinementManagerOptions = {
+  fileId: string;
+};
+
 export class RefinementManager {
-  readonly fileName: string;
+  readonly fileId: string;
   bins: BinData[];
 
   readonly numberManager: NumberManager;
@@ -19,21 +23,24 @@ export class RefinementManager {
   readonly progress = create<number>(() => 0);
   private _pollingProgressInterval: NodeJS.Timeout | undefined;
 
-  constructor() {
+  constructor(options: RefinementManagerOptions) {
     // Initialize 5 bins
     this.bins = Array.from(
       { length: 5 },
       (_, index) => new BinData(`0${index + 1}`)
     );
 
-    this.fileName = "Cold Harbor";
+    this.fileId = options.fileId;
 
     this.numberManager = new NumberManager();
     this.pointerManager = new PointerManager();
     this.temperManager = new TemperManager({
       numberManager: this.numberManager,
     });
-    this.progressSaver = new ProgressSaver(this.fileName, this.bins);
+    this.progressSaver = new ProgressSaver({
+      fileId: this.fileId,
+      bins: this.bins,
+    });
 
     this.initializeAllListeners();
   }
@@ -41,7 +48,7 @@ export class RefinementManager {
   initializeAllListeners() {
     console.log("RefinementManager#init");
     this.progressSaver.restoreBinProgress({
-      fileName: this.fileName,
+      fileId: this.fileId,
       bins: this.bins,
     });
     this.progressSaver.startPeriodicSaving();

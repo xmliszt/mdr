@@ -1,6 +1,6 @@
 "use client";
 
-import { NumberManager } from "@/app/lumon/mdr/number-manager";
+import { NumberManager } from "@/app/lumon/mdr/[file_id]/number-manager";
 import { v4 } from "uuid";
 /**
  * Manages the temper of the numbers in the grid.

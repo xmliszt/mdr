@@ -1,29 +1,30 @@
 "use client";
 
-import { RefinementManager } from "@/app/lumon/mdr/refinement-manager";
+import { RefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-manager";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const RefinementContext = createContext<RefinementManager | null>(null);
 
-export function RefinementProvider({
-  children,
-}: {
+type RefinementProviderProps = {
   children: React.ReactNode;
-}) {
+  fileId: string;
+};
+
+export function RefinementProvider(props: RefinementProviderProps) {
   const [refinementManager, setRefinementManager] =
     useState<RefinementManager | null>(null);
 
   useEffect(() => {
-    const refinementManager = new RefinementManager();
+    const refinementManager = new RefinementManager({ fileId: props.fileId });
     setRefinementManager(refinementManager);
     return () => refinementManager.unmount();
-  }, []);
+  }, [props.fileId]);
 
   if (!refinementManager) return null;
 
   return (
     <RefinementContext.Provider value={refinementManager}>
-      {children}
+      {props.children}
     </RefinementContext.Provider>
   );
 }

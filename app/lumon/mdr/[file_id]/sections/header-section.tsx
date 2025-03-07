@@ -1,15 +1,17 @@
 "use client";
 
-import { RefinementProgress } from "@/app/lumon/mdr/components/refinement-progress";
+import { RefinementProgress } from "@/app/lumon/mdr/[file_id]/components/refinement-progress";
+import { FILES } from "@/app/lumon/mdr/[file_id]/files";
+import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
 import LumonGlobeImage from "@/app/lumon/mdr/lumon-globe.png";
-import { useRefinementManager } from "@/app/lumon/mdr/refinement-provider";
 import Image from "next/image";
 import Link from "next/link";
 
 export function HeaderSection() {
   const refinementManager = useRefinementManager();
   const progress = refinementManager.progress();
-  const fileLabel = refinementManager.fileName;
+  const fileLabel = FILES[refinementManager.fileId];
+  if (!fileLabel) throw new Error("Invalid file");
 
   return (
     <div className="relative h-32 px-4 w-full flex items-center justify-between">
@@ -19,7 +21,7 @@ export function HeaderSection() {
       {/* Link */}
       <Link
         draggable={false}
-        href="/"
+        href="/lumon/mdr"
         className="absolute right-0 cursor-default focus-visible:outline-none"
       >
         <Image

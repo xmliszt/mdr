@@ -1,10 +1,10 @@
 "use client"; // Mark this as a Client Component
 
-import { BinData, BinDataMetrics } from "@/app/lumon/mdr/bin-data";
+import { BinData, BinDataMetrics } from "@/app/lumon/mdr/[file_id]/bin-data";
 
-interface ProgressData {
+type ProgressData = {
   files: {
-    [name: string]: {
+    [fileId: string]: {
       progress: {
         [binId: string]: {
           metrics: BinDataMetrics;
@@ -12,7 +12,12 @@ interface ProgressData {
       };
     };
   };
-}
+};
+
+type ProgressSaverOptions = {
+  fileId: string;
+  bins: BinData[];
+};
 
 /**
  * ProgressSaver
@@ -32,7 +37,7 @@ interface ProgressData {
  *    const bins = [new BinData("AA"), new BinData("AB")];
  *
  *    // Save progress to a named file
- *    await progressSaver.saveProgress("my_session", bins);
+ *    await progressSaver.saveProgress({ fileId: "my_session", bins });
  *    ```
  *
  * 3. Restore progress from a saved file:
@@ -41,7 +46,7 @@ interface ProgressData {
  *    const bins = [new BinData("AA"), new BinData("AB")];
  *
  *    // Restore progress from a saved file
- *    const success = await progressSaver.restoreProgress("my_session", bins);
+ *    const success = await progressSaver.restoreProgress({ fileId: "my_session", bins });
  *    ```
  *
  * 4. List all saved files:
@@ -50,19 +55,18 @@ interface ProgressData {
  *    // Returns: ["my_session", "another_session", ...]
  *    ```
  */
-
 export class ProgressSaver {
   private readonly DB_NAME = "lumon_mdr_progress";
   private readonly STORE_NAME = "progress_data";
   private readonly VERSION = 1;
   private dbPromise: Promise<IDBDatabase> | null = null;
-  private _fileName: string;
+  private _fileId: string;
   private _bins: BinData[];
   private _periodicSaverInterval: NodeJS.Timeout | undefined;
 
-  constructor(fileName: string, bins: BinData[]) {
-    this._fileName = fileName;
-    this._bins = bins;
+  constructor(options: ProgressSaverOptions) {
+    this._fileId = options.fileId;
+    this._bins = options.bins;
 
     // Only initialize DB on the client
     if (typeof window === "undefined") return;
@@ -77,7 +81,7 @@ export class ProgressSaver {
     this._periodicSaverInterval = setInterval(async () => {
       try {
         await this.saveProgress({
-          fileName: this._fileName,
+          fileId: this._fileId,
           bins: this._bins,
         });
       } catch (error) {
@@ -90,7 +94,7 @@ export class ProgressSaver {
   beforeUnmount() {
     if (typeof window === "undefined") return; // Do nothing on server
     this.saveProgress({
-      fileName: this._fileName,
+      fileId: this._fileId,
       bins: this._bins,
     }).catch((error) => console.error("Unmount save failed:", error));
     if (this._periodicSaverInterval) clearInterval(this._periodicSaverInterval);
@@ -138,7 +142,7 @@ export class ProgressSaver {
   }
 
   async saveProgress(options: {
-    fileName: string;
+    fileId: string;
     bins: BinData[];
   }): Promise<void> {
     try {
@@ -153,13 +157,13 @@ export class ProgressSaver {
           files: {},
         };
 
-        if (!existingData.files[options.fileName]) {
-          existingData.files[options.fileName] = { progress: {} };
+        if (!existingData.files[options.fileId]) {
+          existingData.files[options.fileId] = { progress: {} };
         }
 
         options.bins.forEach((bin) => {
           const metrics = bin.store.getState();
-          existingData.files[options.fileName].progress[bin.binId] = {
+          existingData.files[options.fileId].progress[bin.binId] = {
             metrics,
           };
         });
@@ -183,7 +187,7 @@ export class ProgressSaver {
   }
 
   private async _loadProgress(options: {
-    fileName: string;
+    fileId: string;
   }): Promise<{ [binId: string]: BinDataMetrics } | null> {
     try {
       const db = await this.getDB();
@@ -196,13 +200,13 @@ export class ProgressSaver {
         request.onsuccess = () => {
           const data: ProgressData = request.result[0] || { files: {} };
 
-          if (!data.files[options.fileName]) {
+          if (!data.files[options.fileId]) {
             resolve(null);
             return;
           }
 
           const binProgress: { [binId: string]: BinDataMetrics } = {};
-          Object.entries(data.files[options.fileName].progress).forEach(
+          Object.entries(data.files[options.fileId].progress).forEach(
             ([binId, binData]) => {
               binProgress[binId] = binData.metrics;
             }
@@ -222,7 +226,7 @@ export class ProgressSaver {
   }
 
   async restoreBinProgress(options: {
-    fileName: string;
+    fileId: string;
     bins: BinData[];
   }): Promise<boolean> {
     try {
