@@ -16,7 +16,7 @@ export function InstructionManualModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="cursor-override" variant="ghost" size="icon">
+        <Button className="cursor-default" variant="ghost" size="icon">
           <BookText className="size-6" />
         </Button>
       </DialogTrigger>
