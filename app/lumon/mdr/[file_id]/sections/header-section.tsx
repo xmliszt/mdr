@@ -22,7 +22,7 @@ export function HeaderSection() {
       <Link
         draggable={false}
         href="/lumon/mdr"
-        className="absolute right-0 cursor-default focus-visible:outline-none"
+        className="absolute right-0 cursor-[var(--cursor)] focus-visible:outline-none"
       >
         <Image
           className="pointer-events-none rounded-full mix-blend-screen opacity-100 relative z-10"

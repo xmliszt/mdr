@@ -16,11 +16,14 @@ export function InstructionManualModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button className="cursor-override" variant="ghost" size="icon">
           <BookText className="size-6" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="[&>button]:hidden p-0">
+      <DialogContent
+        className="[&>button]:hidden p-0"
+        onKeyDown={(event) => event.stopPropagation()}
+      >
         <ScrollArea className="h-[80vh]">
           <div className="p-4 flex flex-col gap-y-2">
             <DialogHeader>
