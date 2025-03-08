@@ -34,7 +34,7 @@ export function StartupLoadingOverlay() {
   const [completedLines, setCompletedLines] = useState<string[]>([]);
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [scope, animate] = useAnimate();
-  const typingSpeed = useRef(0.5); // milliseconds per character
+  const typingSpeed = useRef(0.1); // milliseconds per character
   const initialized = InitializedStore();
 
   // Type out characters one by one
@@ -50,7 +50,7 @@ export function StartupLoadingOverlay() {
       // Still typing the current line
       const timeout = setTimeout(() => {
         setCurrentText(currentLine.substring(0, currentText.length + 1));
-      }, typingSpeed.current + Math.random() * 20); // Add some randomness to typing speed
+      }, typingSpeed.current + Math.random() * 10); // Add some randomness to typing speed
 
       return () => clearTimeout(timeout);
     } else {
@@ -95,13 +95,7 @@ export function StartupLoadingOverlay() {
       <div className="w-full max-w-4xl p-8 overflow-hidden">
         <div className="font-mono text-sm text-accent-foreground leading-tight">
           {completedLines.map((line, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="whitespace-pre"
-            >
+            <motion.div key={index} className="whitespace-pre">
               {line}
             </motion.div>
           ))}
@@ -109,7 +103,7 @@ export function StartupLoadingOverlay() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.15 }}
               className="whitespace-pre border-r-2 border-accent-foreground animate-pulse"
             >
               {currentText}

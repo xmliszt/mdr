@@ -263,13 +263,7 @@ export function FileSelector() {
                   }
                 }}
               >
-                <div
-                  className="relative w-[150px] h-[150px]"
-                  style={{
-                    transformStyle: "preserve-3d",
-                    perspective: "800px",
-                  }}
-                >
+                <div className="relative w-[150px] h-[150px] transform-3d perspective-midrange backface-hidden will-change-transform translate-z-0">
                   {/* Folder back */}
                   <div
                     className={cn(
@@ -287,7 +281,8 @@ export function FileSelector() {
                       "w-[160px] h-[80px] rounded-sm bg-white",
                       // Center the file
                       "absolute bottom-0 left-1/2 -translate-x-1/2",
-                      "shadow-lg transition-all duration-200 ease-out"
+                      "shadow-lg transition-all duration-200 ease-out",
+                      "backface-visibility-hidden will-change-transform"
                     )}
                     initial={{
                       translateY: 0,
@@ -296,8 +291,8 @@ export function FileSelector() {
                       translateY: isSelected ? -60 : 0,
                     }}
                     transition={{
-                      duration: 0.2,
-                      ease: "easeOut",
+                      duration: 0.25,
+                      ease: [0.25, 0.1, 0.25, 1], // cubic-bezier for smoother motion
                     }}
                   >
                     {/* File name */}
@@ -312,7 +307,8 @@ export function FileSelector() {
                       "w-[180px] h-[110px] rounded-lg",
                       "absolute left-1/2 -translate-x-1/2 bottom-0 origin-bottom",
                       "transition-all duration-200 ease-out",
-                      "transform-style-preserve-3d",
+                      "transform-style-preserve-3d perspective-[800px]",
+                      "backface-visibility-hidden will-change-transform",
                       hasProgress ? "bg-[#2d6ca8]" : "bg-[#295a8e]",
                       isSelected
                         ? "shadow-[0_-7px_10px_rgba(0,0,0,0.5)]"
@@ -322,8 +318,8 @@ export function FileSelector() {
                       rotateX: isSelected ? -30 : 0,
                     }}
                     transition={{
-                      duration: 0.2,
-                      ease: "easeOut",
+                      duration: 0.25,
+                      ease: [0.25, 0.1, 0.25, 1], // cubic-bezier for smoother motion
                     }}
                     whileHover={{
                       rotateX: isSelected ? -30 : -15,
