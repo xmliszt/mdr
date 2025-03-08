@@ -28,6 +28,14 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const animationFrameRef = useRef<number | null>(null);
   const scaleRef = useRef(1);
   const glowIntensityRef = useRef(0);
+  const isHighlightedRef = useRef(number.isHighlighted);
+  const temperRef = useRef(number.temper);
+
+  // Update refs when props change to avoid animation restarts
+  useEffect(() => {
+    isHighlightedRef.current = number.isHighlighted;
+    temperRef.current = number.temper;
+  }, [number.isHighlighted, number.temper]);
 
   // Initialize position and speed once
   useEffect(() => {
@@ -122,13 +130,18 @@ export function NumberCell({ cellId }: NumberCellProps) {
         )
       );
 
-      scaleRef.current =
+      // Use a smooth transition for the highlight scale effect
+      const targetScale =
         // base scale
         1 +
         // dynamic scale based on distance from pointer
         distanceRatio * (GRID_CONFIG.MAX_SCALE - 1) +
         // if highlighted, scale up
-        (number.isHighlighted ? 0.25 : 0);
+        (isHighlightedRef.current ? 0.25 : 0);
+
+      // Smoothly interpolate to the target scale
+      scaleRef.current =
+        scaleRef.current + (targetScale - scaleRef.current) * 0.1;
 
       glowIntensityRef.current = distanceRatio * 10;
     }
@@ -150,31 +163,43 @@ export function NumberCell({ cellId }: NumberCellProps) {
 
     // Apply the transform directly to the DOM element
     numberRef.current.style.opacity = "100%";
-    numberRef.current.style.filter = `drop-shadow(0 0 ${glowIntensityRef.current}px rgba(255, 255, 255, 0.3))`;
+
+    // Use CSS variables for transitions
+    if (isHighlightedRef.current) {
+      numberRef.current.style.setProperty(
+        "--glow-intensity",
+        `${glowIntensityRef.current + 5}px`
+      );
+    } else {
+      numberRef.current.style.setProperty(
+        "--glow-intensity",
+        `${glowIntensityRef.current}px`
+      );
+    }
 
     const shakeIntensity = (() => {
-      switch (number.temper) {
+      switch (temperRef.current) {
         case "WO":
-          return 4;
+          return 1.5;
         case "FC":
-          return 5;
+          return 2;
         case "DR":
-          return 3;
+          return 2.5;
         case "MA":
-          return 6;
+          return 3;
         default:
           return 0;
       }
     })();
 
     const scaleIntensity = (() => {
-      switch (number.temper) {
+      switch (temperRef.current) {
         case "WO":
           return 1;
-        case "FC":
-          return 1.2;
         case "DR":
           return 1.1;
+        case "FC":
+          return 1.2;
         case "MA":
           return 1.3;
         default:
@@ -184,8 +209,8 @@ export function NumberCell({ cellId }: NumberCellProps) {
 
     // Add shaking effect when number is highlighted
     // Define shake intensity and generate random shake offset within that range
-    const shakeOffsetX = (Math.random() - 0.5) * shakeIntensity * 2;
-    const shakeOffsetY = (Math.random() - 0.5) * shakeIntensity * 2;
+    const shakeOffsetX = (Math.random() - 0.5) * shakeIntensity;
+    const shakeOffsetY = (Math.random() - 0.5) * shakeIntensity;
 
     // Apply shake offset to the current position
     // Force browser to use GPU by using translate3d hack.
@@ -195,25 +220,21 @@ export function NumberCell({ cellId }: NumberCellProps) {
       scaleRef.current * scaleIntensity
     })`;
     numberRef.current.style.transform = shakeAndScaleTransform;
-  }, [
-    number.isHighlighted,
-    number.temper,
-    number.absoluteRow,
-    number.absoluteCol,
-    numberManager,
-    pointerManager,
-  ]);
+  }, [numberManager, pointerManager, number.absoluteRow, number.absoluteCol]);
 
   // When mounted, start moving the number element in the cell container.
   useEffect(() => {
     const numberElement = numberRef.current;
     if (!numberElement) return;
 
-    const loop = () => {
-      animate();
+    // Only start the animation if it's not already running
+    if (animationFrameRef.current === null) {
+      const loop = () => {
+        animate();
+        animationFrameRef.current = requestAnimationFrame(loop);
+      };
       animationFrameRef.current = requestAnimationFrame(loop);
-    };
-    animationFrameRef.current = requestAnimationFrame(loop);
+    }
 
     return () => {
       if (animationFrameRef.current !== null) {
@@ -228,7 +249,7 @@ export function NumberCell({ cellId }: NumberCellProps) {
       numberElement.style.filter = "";
       numberElement.style.opacity = "0";
     };
-  }, [animate, cellId]);
+  }, [animate]);
 
   return (
     <>
@@ -260,9 +281,13 @@ export function NumberCell({ cellId }: NumberCellProps) {
           className={cn(
             "absolute top-0 left-0",
             "origin-center",
-            "font-extrabold font-sans text-foreground text-xl",
-            "will-change-[transform,opacity,filter] opacity-0 duration-300",
-            number.isHighlighted && "text-white"
+            "font-extrabold font-sans text-xl",
+            "will-change-[transform,opacity,filter] opacity-0",
+            "transition-[color,text-shadow,filter] duration-300 ease-in-out",
+            "drop-shadow-[0_0_var(--glow-intensity,0px)_rgba(255,255,255,0.3)]",
+            number.isHighlighted
+              ? "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+              : "text-foreground"
           )}
         >
           {number.val}

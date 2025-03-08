@@ -218,15 +218,24 @@ export class NumberManager {
   highlightNumbers(numbers: MdrNumber[]) {
     // The numbers passed in are already in the current viewport's coordinate system
     // so we can directly update their highlight state
-    this.store.setState({
-      numbers: this.store
-        .getState()
-        .numbers.map((n) =>
-          numbers.includes(n)
-            ? { ...n, isHighlighted: true }
-            : { ...n, isHighlighted: false }
-        ),
+    const currentNumbers = this.store.getState().numbers;
+    const numberIds = new Set(numbers.map((n) => n.id));
+
+    // Only update numbers whose highlight state needs to change
+    const updatedNumbers = currentNumbers.map((n) => {
+      const shouldBeHighlighted = numberIds.has(n.id);
+      if (shouldBeHighlighted === n.isHighlighted) {
+        // No change needed, return the same object reference
+        return n;
+      }
+      // Only create new objects for numbers that need to change
+      return { ...n, isHighlighted: shouldBeHighlighted };
     });
+
+    // Only update state if there were actual changes
+    if (updatedNumbers.some((n, i) => n !== currentNumbers[i])) {
+      this.store.setState({ numbers: updatedNumbers });
+    }
   }
 
   /**
