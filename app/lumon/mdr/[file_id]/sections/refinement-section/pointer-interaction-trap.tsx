@@ -112,9 +112,7 @@ export function PointerInteractionTrap() {
 
   // Clean up the throttled function on unmount
   useEffect(() => {
-    return () => {
-      throttledPointerMove.cancel();
-    };
+    return () => throttledPointerMove.cancel();
   }, [throttledPointerMove]);
 
   const handleOnClick = useCallback(

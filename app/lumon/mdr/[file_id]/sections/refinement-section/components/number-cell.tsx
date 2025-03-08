@@ -15,6 +15,12 @@ export function NumberCell({ cellId }: NumberCellProps) {
   const { numberManager, pointerManager } = refinementManager;
   const number = numberManager.getNumber(cellId);
 
+  // Calculate relative position for rendering
+  const relativePosition = numberManager.getRelativePosition(
+    number.absoluteRow,
+    number.absoluteCol
+  );
+
   const containerRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const positionRef = useRef({ x: 0, y: 0 });
   const speedRef = useRef({ x: 0, y: 0 });
@@ -88,11 +94,17 @@ export function NumberCell({ cellId }: NumberCellProps) {
     const gridRect = pointerState.gridRect;
 
     if (gridRect) {
+      // Get the current relative position
+      const { relativeRow, relativeCol } = numberManager.getRelativePosition(
+        number.absoluteRow,
+        number.absoluteCol
+      );
+
       // Calculate the cell's center position in screen coordinates
       const cellCenterX =
-        gridRect.left + (number.relativeCol + 0.5) * GRID_CONFIG.CELL_SIZE;
+        gridRect.left + (relativeCol + 0.5) * GRID_CONFIG.CELL_SIZE;
       const cellCenterY =
-        gridRect.top + (number.relativeRow + 0.5) * GRID_CONFIG.CELL_SIZE;
+        gridRect.top + (relativeRow + 0.5) * GRID_CONFIG.CELL_SIZE;
 
       // Calculate distance from pointer to cell center
       const distanceFromPointer = Math.sqrt(
@@ -186,8 +198,9 @@ export function NumberCell({ cellId }: NumberCellProps) {
   }, [
     number.isHighlighted,
     number.temper,
-    number.relativeRow,
-    number.relativeCol,
+    number.absoluteRow,
+    number.absoluteCol,
+    numberManager,
     pointerManager,
   ]);
 
@@ -230,8 +243,12 @@ export function NumberCell({ cellId }: NumberCellProps) {
           height: GRID_CONFIG.CELL_SIZE,
           // Position the cell in the grid.
           transform: `
-            translateX(${number.relativeCol * GRID_CONFIG.CELL_SIZE}px)
-            translateY(${number.relativeRow * GRID_CONFIG.CELL_SIZE}px)
+            translateX(${
+              relativePosition.relativeCol * GRID_CONFIG.CELL_SIZE
+            }px)
+            translateY(${
+              relativePosition.relativeRow * GRID_CONFIG.CELL_SIZE
+            }px)
           `,
           zIndex: 0,
         }}

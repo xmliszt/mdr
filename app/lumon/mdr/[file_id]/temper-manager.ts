@@ -56,8 +56,15 @@ export class TemperManager {
     const randomIndex = Math.floor(Math.random() * numbers.length);
     const randomNumber = numbers[randomIndex];
 
+    // Get the relative position for the visible cell
+    const { relativeRow, relativeCol } =
+      this._numberManager.getRelativePosition(
+        randomNumber.absoluteRow,
+        randomNumber.absoluteCol
+      );
+
     // Use the relative row and column for the visible cell
-    this._assignTemper(randomNumber.relativeRow, randomNumber.relativeCol, "none", true);
+    this._assignTemper(relativeRow, relativeCol, "none", true);
   }
 
   private _assignTemper(
