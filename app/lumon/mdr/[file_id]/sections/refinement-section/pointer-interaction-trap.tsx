@@ -123,7 +123,7 @@ export function PointerInteractionTrap() {
 
   return (
     <div
-      className="absolute inset-0 w-full h-full z-[9999]"
+      className="absolute inset-0 w-full h-full z-[9999] opacity-0"
       onClick={handleOnClick}
       onPointerMove={throttledPointerMove}
     />

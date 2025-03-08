@@ -242,6 +242,10 @@ export class NumberManager {
    * Move the viewport in the specified direction
    */
   moveViewport(direction: "up" | "down" | "left" | "right") {
+    // If assigning any bin, do nothing
+    if (Object.values(this._assigningBins).some((isAssigning) => isAssigning))
+      return;
+
     const { viewport } = this.store.getState();
 
     let newViewport: ViewportPosition;

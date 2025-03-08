@@ -45,21 +45,21 @@ export function NumberGrid() {
         "ArrowRight",
       ].includes(e.key);
 
-      if (isArrowKey) {
-        // Show navigation feedback
-        setIsNavigating(true);
+      if (!isArrowKey) return;
 
-        // Clear any existing timeout
-        if (navigationTimeoutRef.current) {
-          clearTimeout(navigationTimeoutRef.current);
-        }
+      // Show navigation feedback
+      setIsNavigating(true);
 
-        // Set a timeout to hide the navigation feedback
-        navigationTimeoutRef.current = setTimeout(() => {
-          setIsNavigating(false);
-          navigationTimeoutRef.current = null;
-        }, 300);
+      // Clear any existing timeout
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
       }
+
+      // Set a timeout to hide the navigation feedback
+      navigationTimeoutRef.current = setTimeout(() => {
+        setIsNavigating(false);
+        navigationTimeoutRef.current = null;
+      }, 300);
 
       switch (e.key) {
         case "ArrowUp":
@@ -127,7 +127,7 @@ export function NumberGrid() {
       {/* Navigation indicator - subtle visual feedback when navigating */}
       <div
         className={cn(
-          "absolute inset-0 pointer-events-none z-40 border-8 border-white/20 shadow-inner shadow-white/10 transition-opacity",
+          "absolute inset-0 pointer-events-none z-40 shadow-[inset_0_0_20px_0px_rgba(255,255,255,0.8)] transition-opacity",
           isNavigating ? "opacity-100" : "opacity-0"
         )}
       />

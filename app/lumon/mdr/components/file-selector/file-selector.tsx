@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import isMobile from "is-mobile";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -371,10 +372,12 @@ export function FileSelector() {
       </ScrollArea>
 
       {/* Bottom instructions */}
-      <div className="absolute bottom-4 left-0 right-0 text-center text-foreground text-opacity-80 py-2">
-        Use mouse wheel or arrow keys to navigate. Press Enter to select. Press
-        Escape to deselect.
-      </div>
+      {!isMobile() && (
+        <div className="absolute bottom-4 px-4 left-0 right-0 text-center text-foreground text-opacity-80 py-2">
+          Use mouse wheel or arrow keys to navigate. Press Enter to select.
+          Press Escape to deselect.
+        </div>
+      )}
 
       {/* Top left link */}
       <div className="absolute -top-4 left-1/2 -translate-x-1/2">

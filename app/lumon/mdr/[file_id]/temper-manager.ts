@@ -25,7 +25,7 @@ export class TemperManager {
    * The maximum percentage of visible numbers with a temper that will be
    * allowed before the event is skipped.
    */
-  static readonly MAX_PERCENTAGE_OF_VISIBLE_NUMBERS_WITH_TEMPER = 0.1;
+  static readonly MAX_PERCENTAGE_OF_VISIBLE_NUMBERS_WITH_TEMPER = 0.05;
 
   private readonly _numberManager: NumberManager;
   private _randomEventInterval: NodeJS.Timeout | undefined;
