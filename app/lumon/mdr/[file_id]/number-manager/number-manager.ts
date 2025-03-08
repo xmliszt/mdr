@@ -1,7 +1,9 @@
 "use client";
 
+import { lumonHundredPercentDialog } from "@/app/components/lumon-hundred-percent-dialog";
 import { lumonNopeDialog } from "@/app/components/lumon-nope-dialog";
 import { BinData } from "@/app/lumon/mdr/[file_id]/bin-data";
+import { RefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-manager";
 import { GRID_CONFIG } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/grid-config";
 import { compact } from "lodash";
 import { create } from "zustand";
@@ -49,6 +51,12 @@ export class NumberManager {
     numbers: [],
     viewport: { startRow: 0, startCol: 0 },
   }));
+
+  private readonly _refinementManager: RefinementManager;
+
+  constructor(refinementManager: RefinementManager) {
+    this._refinementManager = refinementManager;
+  }
 
   /**
    * Cache of generated numbers to maintain consistency when revisiting positions
@@ -288,20 +296,40 @@ export class NumberManager {
 
   private _assigningBins: { [binId: string]: boolean } = {};
 
+  get isAllNumbersComplete() {
+    const bins = this._refinementManager.bins;
+    return bins.every(
+      (bin) =>
+        bin.store.getState().wo === 1 &&
+        bin.store.getState().fc === 1 &&
+        bin.store.getState().dr === 1 &&
+        bin.store.getState().ma === 1
+    );
+  }
+
+  get lumonBlockingDialog() {
+    if (this.isAllNumbersComplete) {
+      return lumonHundredPercentDialog;
+    }
+    return lumonNopeDialog;
+  }
+
   async assignHighlightedNumbersToBin(bin: BinData) {
-    // If the bin is already full, do nothing
-    if (
-      bin.store.getState().wo === 1 &&
-      bin.store.getState().fc === 1 &&
-      bin.store.getState().dr === 1 &&
-      bin.store.getState().ma === 1
-    ) {
-      lumonNopeDialog.show();
+    // Check if the bin is already full (all tempers at 100%)
+    const binState = bin.store.getState();
+    const isBinFull =
+      binState.wo === 1 &&
+      binState.fc === 1 &&
+      binState.dr === 1 &&
+      binState.ma === 1;
+
+    if (isBinFull) {
+      this.lumonBlockingDialog.show();
       return;
     }
 
     if (this._assigningBins[bin.binId]) {
-      lumonNopeDialog.show();
+      this.lumonBlockingDialog.show();
       return;
     }
 
@@ -320,13 +348,13 @@ export class NumberManager {
 
     // If there are no highlighted numbers, do nothing
     if (highlightedNumbers.length === 0) {
-      lumonNopeDialog.show();
+      this.lumonBlockingDialog.show();
       return;
     }
 
     // If highlighted numbers have no tempers, do nothing
     if (highlightedNumbers.every((n) => n.temper === undefined)) {
-      lumonNopeDialog.show();
+      this.lumonBlockingDialog.show();
       return;
     }
 
@@ -506,6 +534,30 @@ export class NumberManager {
     if (this.numberCache.has(cacheKey)) {
       const cachedNumber = this.numberCache.get(cacheKey)!;
       this.numberCache.set(cacheKey, { ...cachedNumber, temper });
+    }
+  }
+
+  clearTemper(relativeRow: number, relativeCol: number) {
+    // Convert relative position to absolute position
+    const { absoluteRow, absoluteCol } = this.getAbsolutePosition(
+      relativeRow,
+      relativeCol
+    );
+
+    this.store.setState(({ numbers: currentNumbers }) => ({
+      numbers: currentNumbers.map((n) =>
+        n.absoluteRow === absoluteRow && n.absoluteCol === absoluteCol
+          ? { ...n, temper: undefined }
+          : n
+      ),
+    }));
+
+    // Also update the cache
+    const cacheKey = this.generateCellId(absoluteRow, absoluteCol);
+
+    if (this.numberCache.has(cacheKey)) {
+      const cachedNumber = this.numberCache.get(cacheKey)!;
+      this.numberCache.set(cacheKey, { ...cachedNumber, temper: undefined });
     }
   }
 }

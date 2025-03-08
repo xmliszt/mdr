@@ -247,6 +247,7 @@ export function FileSelector() {
             const completionPercentage = progress?.completionPercentage || 0;
             const hasProgress = completionPercentage > 0;
             const isSelected = index === selectedIndex;
+            const isComplete = completionPercentage >= 100;
 
             return (
               <motion.div
@@ -335,7 +336,14 @@ export function FileSelector() {
 
                     {/* Progress indicator badge */}
                     {hasProgress && (
-                      <div className="absolute top-2 right-2 size-2 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
+                      <div
+                        className={cn(
+                          "absolute top-2 right-2 size-2 rounded-full",
+                          isComplete
+                            ? "bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"
+                            : "bg-amber-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"
+                        )}
+                      />
                     )}
 
                     {/* Progress bar */}
@@ -343,7 +351,11 @@ export function FileSelector() {
                       <div className="absolute flex items-center gap-x-1.5 bottom-1.5 left-4 right-4">
                         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden shadow-md">
                           <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-amber-300"
+                            className={
+                              isComplete
+                                ? "h-full bg-gradient-to-r from-green-500 to-green-300"
+                                : "h-full bg-gradient-to-r from-amber-500 to-amber-300"
+                            }
                             style={{ width: `${completionPercentage}%` }}
                           />
                         </div>

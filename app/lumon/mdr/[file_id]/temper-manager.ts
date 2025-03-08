@@ -29,13 +29,16 @@ export class TemperManager {
 
   private readonly _numberManager: NumberManager;
   private _randomEventInterval: NodeJS.Timeout | undefined;
+  private _isActive: boolean = true;
 
   constructor(options: { numberManager: NumberManager }) {
     this._numberManager = options.numberManager;
   }
 
   private _runRandomEvent() {
-    // Skip if grid isn't initialized
+    // Skip if grid isn't initialized or if temper assignment is stopped
+    if (!this._isActive) return;
+
     const { numbers } = this._numberManager.store.getState();
     if (numbers.length === 0) {
       console.warn(
@@ -73,6 +76,9 @@ export class TemperManager {
     direction: "left" | "right" | "up" | "down" | "none",
     mustChain = false
   ) {
+    // Skip if temper assignment is stopped
+    if (!this._isActive) return;
+
     // Bounds check using relative coordinates (only visible cells)
     if (
       relativeRow < 0 ||
@@ -153,6 +159,7 @@ export class TemperManager {
   }
 
   startRandomEvent() {
+    this._isActive = true;
     if (this._randomEventInterval) clearInterval(this._randomEventInterval);
     this._randomEventInterval = setInterval(() => {
       // Run in a separate context to avoid triggering React re-renders directly
@@ -161,6 +168,7 @@ export class TemperManager {
   }
 
   stopRandomEvent() {
+    this._isActive = false;
     if (this._randomEventInterval) clearInterval(this._randomEventInterval);
   }
 }
