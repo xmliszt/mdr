@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Share2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Share2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
 type SocialShareDialogProps = {
@@ -86,9 +87,35 @@ export function SocialShareDialog({
           {sharableContent}
         </p>
         <DialogFooter className="mt-4">
-          <Button onClick={handleShare} className="w-max">
-            <Share2 className="mr-1 size-4" />
-            {copied ? "Copied to clipboard!" : "Share achievement"}
+          <Button
+            onClick={handleShare}
+            className="relative w-48 overflow-hidden"
+          >
+            <AnimatePresence initial={false}>
+              {copied ? (
+                <motion.div
+                  key="copied"
+                  className="absolute inset-0 flex items-center gap-x-2 justify-center"
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "-100%" }}
+                >
+                  <Check className="size-4" />
+                  <span>Copied to clipboard!</span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="share"
+                  className="absolute inset-0 flex items-center gap-x-2 justify-center"
+                  initial={{ y: "-100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                >
+                  <Share2 className="size-4" />
+                  <span>Share achievement</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Button>
         </DialogFooter>
       </DialogContent>
