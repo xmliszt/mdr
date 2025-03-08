@@ -1,32 +1,8 @@
 "use client";
 
 import { motion, useAnimate } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { create } from "zustand";
-
-// Text content from the image
-const startupText = [
-  "Open interface: 0x100000531",
-  "parseElements: keyboard: 0 digitizer: 12 pointer: 0 0 scroll: 0 led: 0",
-  "parseElements: vendor: 2",
-  "HE2N_Key Does Not Exist, use kSMCPStatesIGPU for Internal GPU",
-  "GPU = IGPU Initialized, Control ID 16",
-  "Exited AGPMController::start()",
-  "-- 0x5c30 -- 0xe000 -- 0x7e00 ****",
-  "initWithTask",
-  "start",
-  "**** -- ON -> ON (thread: 0xfa40)",
-  "Speaker has output streams: 1",
-  "Reuse output buffer idx:1 dev:Speaker offset:13c000 size:41000",
-  "Codec Output has output streams: 1",
-  "Reuse output buffer idx:2 dev:Codec Output offset:184000 size:20800",
-  "Digital Mic has output streams: 0",
-  "Codec Input has output streams: 0",
-  "Total output descriptors: 3",
-  "Device:Speaker using output stream idx:1",
-  "Registered DeviceUID:Speaker Index:1",
-  "ActuatorDeviceUserClient::start Entered",
-];
 
 export function StartupLoadingOverlay() {
   const [currentLineIndex, setCurrentLineIndex] = useState<number>(0);
@@ -37,14 +13,102 @@ export function StartupLoadingOverlay() {
   const typingSpeed = useRef(0.1); // milliseconds per character
   const initialized = InitializedStore();
 
+  // Variables for the startup text
+  const [interfaceId, setInterfaceId] = useState<string>("");
+  const [keyboardCount, setKeyboardCount] = useState<number>(0);
+  const [digitizerCount, setDigitizerCount] = useState<number>(0);
+  const [pointerCount, setPointerCount] = useState<number>(0);
+  const [scrollCount, setScrollCount] = useState<number>(0);
+  const [ledCount, setLedCount] = useState<number>(0);
+  const [vendorCount, setVendorCount] = useState<number>(0);
+  const [gpuCount, setGpuCount] = useState<number>(0);
+  const [speakerCount, setSpeakerCount] = useState<number>(0);
+  const [codecOutputCount, setCodecOutputCount] = useState<number>(0);
+  const [digitalMicCount, setDigitalMicCount] = useState<number>(0);
+  const [codecInputCount, setCodecInputCount] = useState<number>(0);
+  const [totalOutputDescriptors, setTotalOutputDescriptors] =
+    useState<number>(0);
+
+  const getStartupText = useCallback(() => {
+    return [
+      `Open interface: 0x${interfaceId}`,
+      `parseElements: keyboard: ${keyboardCount} digitizer: ${digitizerCount} pointer: ${pointerCount} 0 scroll: ${scrollCount} led: ${ledCount}`,
+      `parseElements: vendor: ${vendorCount}`,
+      "HE2N_Key Does Not Exist, use kSMCPStatesIGPU for Internal GPU",
+      `GPU = IGPU Initialized, Control ID ${gpuCount}`,
+      "Exited AGPMController::start()",
+      "-- 0x5c30 -- 0xe000 -- 0x7e00 ****",
+      "initWithTask",
+      "start",
+      "**** -- ON -> ON (thread: 0xfa40)",
+      `Speaker has output streams: ${speakerCount}`,
+      "Reuse output buffer idx:1 dev:Speaker offset:13c000 size:41000",
+      `Codec Output has output streams: ${codecOutputCount}`,
+      "Reuse output buffer idx:2 dev:Codec Output offset:184000 size:20800",
+      `Digital Mic has output streams: ${digitalMicCount}`,
+      `Codec Input has output streams: ${codecInputCount}`,
+      `Total output descriptors: ${totalOutputDescriptors}`,
+      `Device:Speaker using output stream idx:${speakerCount}`,
+      `Registered DeviceUID:Speaker Index:${speakerCount}`,
+      "ActuatorDeviceUserClient::start Entered",
+    ];
+  }, [
+    codecInputCount,
+    codecOutputCount,
+    digitalMicCount,
+    digitizerCount,
+    gpuCount,
+    interfaceId,
+    keyboardCount,
+    ledCount,
+    pointerCount,
+    scrollCount,
+    speakerCount,
+    totalOutputDescriptors,
+    vendorCount,
+  ]);
+
+  useEffect(() => {
+    // Generate random interface ID
+    const interfaceId = Math.floor(Math.random() * 0xffffffff).toString(16);
+    setInterfaceId(interfaceId);
+
+    // Generate random counts for the startup text
+    const keyboardCount = Math.floor(Math.random() * 10);
+    const digitizerCount = Math.floor(Math.random() * 10);
+    const pointerCount = Math.floor(Math.random() * 10);
+    const scrollCount = Math.floor(Math.random() * 10);
+    const ledCount = Math.floor(Math.random() * 10);
+    const vendorCount = Math.floor(Math.random() * 10);
+    const gpuCount = Math.floor(Math.random() * 10);
+    const speakerCount = Math.floor(Math.random() * 10);
+    const codecOutputCount = Math.floor(Math.random() * 10);
+    const digitalMicCount = Math.floor(Math.random() * 10);
+    const codecInputCount = Math.floor(Math.random() * 10);
+    const totalOutputDescriptors = Math.floor(Math.random() * 10);
+
+    setKeyboardCount(keyboardCount);
+    setDigitizerCount(digitizerCount);
+    setPointerCount(pointerCount);
+    setScrollCount(scrollCount);
+    setLedCount(ledCount);
+    setVendorCount(vendorCount);
+    setGpuCount(gpuCount);
+    setSpeakerCount(speakerCount);
+    setCodecOutputCount(codecOutputCount);
+    setDigitalMicCount(digitalMicCount);
+    setCodecInputCount(codecInputCount);
+    setTotalOutputDescriptors(totalOutputDescriptors);
+  }, []);
+
   // Type out characters one by one
   useEffect(() => {
-    if (currentLineIndex >= startupText.length) {
+    if (currentLineIndex >= getStartupText().length) {
       setIsComplete(true);
       return;
     }
 
-    const currentLine = startupText[currentLineIndex];
+    const currentLine = getStartupText()[currentLineIndex];
 
     if (currentText.length < currentLine.length) {
       // Still typing the current line
@@ -63,7 +127,7 @@ export function StartupLoadingOverlay() {
 
       return () => clearTimeout(nextLineTimeout);
     }
-  }, [currentLineIndex, currentText, completedLines]);
+  }, [currentLineIndex, currentText, completedLines, getStartupText]);
 
   // Fade out the overlay when animation is complete
   useEffect(() => {
