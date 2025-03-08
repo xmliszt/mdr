@@ -268,10 +268,9 @@ export class NumberManager {
 
     // Regenerate the numbers for the new viewport
     const numberGrid = document.getElementById("number_grid");
-    if (numberGrid) {
-      const { width, height } = numberGrid.getBoundingClientRect();
-      this.generateNumbers({ w: width, h: height });
-    }
+    if (!numberGrid) throw new Error(`Number grid not found`);
+    const { width, height } = numberGrid.getBoundingClientRect();
+    this.generateNumbers({ w: width, h: height });
   }
 
   private _assigningBins: { [binId: string]: boolean } = {};
@@ -357,7 +356,6 @@ export class NumberManager {
     if (!gridContainer) throw new Error(`Grid container not found`);
     const gridContainerRect = gridContainer.getBoundingClientRect();
 
-    // Force a reflow to ensure styles are applied immediately
     numAndCells.forEach(({ cell }, idx) => {
       // Set position to maintain visual position relative to viewport
       cell.style.left = `${gridContainerRect.left}px`;
@@ -403,18 +401,17 @@ export class NumberManager {
    */
   private _resetHighlightedNumbers(higlightedNumbers: MdrNumber[]) {
     higlightedNumbers.forEach((num) => {
-      // 1. Update the number with new random value, temper, and isHighlighted to false.
+      const newNumber = this._generateNewNumberForAbsolutePosition(
+        num.absoluteRow,
+        num.absoluteCol
+      );
+      // Update cache
+      const cacheKey = this.generateCellId(num.absoluteRow, num.absoluteCol);
+      this.numberCache.set(cacheKey, newNumber);
+
+      // Update the number with new random value, temper, and isHighlighted to false.
       this.store.setState(({ numbers: currentNumbers }) => ({
-        numbers: currentNumbers.map((n) =>
-          n.id === num.id
-            ? {
-                ...n,
-                val: Math.floor(Math.random() * 10),
-                temper: undefined,
-                isHighlighted: false,
-              }
-            : n
-        ),
+        numbers: currentNumbers.map((n) => (n.id === num.id ? newNumber : n)),
       }));
 
       // 2. Restore each number element to its original position.
