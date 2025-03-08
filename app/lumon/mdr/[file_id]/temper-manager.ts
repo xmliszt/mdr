@@ -12,7 +12,7 @@ export class TemperManager {
   /**
    * The chance of an event happening.
    */
-  static readonly CHANCE_OF_EVENT = 0.3;
+  static readonly CHANCE_OF_EVENT = 0.5;
   /**
    * The chance of a chain happening.
    */
@@ -49,7 +49,7 @@ export class TemperManager {
     const numbersWithTemper = numbers.filter((n) => n.temper);
     if (numbersWithTemper.length / numbers.length > 0.1) return;
 
-    // 60% chance to skip the event
+    // Chance to skip the event
     if (Math.random() >= TemperManager.CHANCE_OF_EVENT) return;
 
     // Choose a random visible cell to start the temper assignment
@@ -84,8 +84,22 @@ export class TemperManager {
       return;
     }
 
+    // If overall visible viewport numbers with temper is greater than the allowed max, skip
+    const numbersWithTemper = this._numberManager.store
+      .getState()
+      .numbers.filter((n) => n.temper);
+    if (
+      numbersWithTemper.length /
+        this._numberManager.store.getState().numbers.length >
+      TemperManager.MAX_PERCENTAGE_OF_VISIBLE_NUMBERS_WITH_TEMPER
+    ) {
+      return;
+    }
+
     // Get number, handle failure gracefully
-    let number: ReturnType<typeof this._numberManager.getNumberForRelativePosition>;
+    let number: ReturnType<
+      typeof this._numberManager.getNumberForRelativePosition
+    >;
     try {
       number = this._numberManager.getNumberForRelativePosition(
         relativeRow,
