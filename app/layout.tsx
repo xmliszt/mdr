@@ -1,3 +1,4 @@
+import { StartupLoadingOverlay } from "@/app/components/startup-loading-overlay";
 import "@/app/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
@@ -54,7 +55,7 @@ export default function RootLayout(props: LayoutProps) {
     <html lang="en" className="w-full h-full" suppressHydrationWarning>
       <body className="antialiased w-full h-full">
         <main className="w-full h-full">{props.children}</main>
-        {/* <StartupLoadingOverlay /> */}
+        <StartupLoadingOverlay />
         <Analytics />
       </body>
     </html>
