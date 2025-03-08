@@ -38,6 +38,7 @@
   --sidebar-accent-foreground: oklch(0.95 0.02 200);
   --sidebar-border: oklch(0.269 0.05 240);
   --sidebar-ring: oklch(0.439 0.02 200);
+  --custom-cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feFlood flood-color="black" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glowBlur"/><feMerge><feMergeNode in="glowBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><path fill="none" stroke="%23D7F0E8" stroke-width="2.25" d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.35Z" filter="url(%23glow)"></path></svg>') 0 0, default;
 }
 
 @theme inline {
@@ -83,17 +84,15 @@
   * {
     @apply border-border outline-ring/50 select-none;
   }
-  html, body, button, a, input, textarea, select, p, span, div, h1, h2, h3, h4, h5, h6 {
-    cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feFlood flood-color="black" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glowBlur"/><feMerge><feMergeNode in="glowBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><path fill="none" stroke="%23D7F0E8" stroke-width="2.25" d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.35Z" filter="url(%23glow)"></path></svg>') 0 0, auto
+  *,
+  *:before,
+  *:after {
+    @apply !cursor-(--custom-cursor)
   }
   body {
     @apply bg-background text-foreground;
     text-shadow: 0 0 3.5px currentColor;
   }
-}
-
-.cursor-override {
-  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feFlood flood-color="black" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glowBlur"/><feMerge><feMergeNode in="glowBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><path fill="none" stroke="%23D7F0E8" stroke-width="2.25" d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.35Z" filter="url(%23glow)"></path></svg>') 0 0, auto
 }
 
 /**
