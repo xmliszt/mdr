@@ -88,8 +88,8 @@ export class RefinementManager {
       }
     });
 
-    // Show completion dialog
-    lumonCompleteDialog.show();
+    // Show completion dialog with the fileId
+    lumonCompleteDialog.show(this.fileId);
   }
 
   unmount() {
