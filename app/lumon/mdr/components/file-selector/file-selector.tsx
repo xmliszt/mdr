@@ -333,7 +333,7 @@ export function FileSelector() {
 
                     {/* Progress indicator badge */}
                     {hasProgress && (
-                      <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
+                      <div className="absolute top-2 right-2 size-2 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
                     )}
 
                     {/* Progress bar */}
