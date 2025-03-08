@@ -3,12 +3,14 @@
 import { LumonLink } from "@/app/components/lumon-link";
 import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
 import { NumberCell } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/components/number-cell";
+import { GRID_CONFIG } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/grid-config";
 import { cn } from "@/lib/utils";
+import { compact } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function NumberGrid() {
   const refinementManager = useRefinementManager();
-  const { numberManager } = refinementManager;
+  const { numberManager, pointerManager } = refinementManager;
   const containerRef = useRef<HTMLDivElement>(null);
   // Subscribe to both numbers and viewport to ensure re-render when either changes
   const { numbers } = numberManager.store();
@@ -35,6 +37,79 @@ export function NumberGrid() {
     return () => window.removeEventListener("resize", handleWindowResize);
   }, [numberManager]);
 
+  // Function to update pointer position to center of viewport
+  const updatePointerToViewportCenter = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    pointerManager.updatePointerPosition(centerX, centerY);
+  }, [pointerManager]);
+
+  // Function to trigger highlighting at current pointer position
+  const triggerHighlightAtPointer = useCallback(() => {
+    const { x, y } = pointerManager.store.getState();
+
+    // Find all cells within the highlight radius and highlight them
+    const gridRect = pointerManager.store.getState().gridRect;
+    if (!gridRect) return;
+
+    const gridX = gridRect.left;
+    const gridY = gridRect.top;
+
+    // Calculate the center cell in relative coordinates
+    const relativeRow = Math.floor((y - gridY) / GRID_CONFIG.CELL_SIZE);
+    const relativeCol = Math.floor((x - gridX) / GRID_CONFIG.CELL_SIZE);
+
+    // Calculate the radius in terms of cells
+    const radiusCells = Math.ceil(
+      GRID_CONFIG.POINTER_INFLUENCE_RADIUS / GRID_CONFIG.CELL_SIZE
+    );
+
+    // Get all cells within the radius
+    const cellsInRadius = compact(
+      Array.from({ length: radiusCells * 2 + 1 }, (_, rowOffset) =>
+        Array.from({ length: radiusCells * 2 + 1 }, (_, colOffset) => {
+          const row = relativeRow - radiusCells + rowOffset;
+          const col = relativeCol - radiusCells + colOffset;
+
+          // Skip invalid positions (only check relative bounds)
+          if (row < 0 || col < 0) return undefined;
+          if (
+            row > numberManager.maxRelativeRow ||
+            col > numberManager.maxRelativeCol
+          )
+            return undefined;
+
+          try {
+            const cell = numberManager.getNumberForRelativePosition(row, col);
+
+            // Calculate the cell's center position
+            const cellCenterX = gridX + (col + 0.5) * GRID_CONFIG.CELL_SIZE;
+            const cellCenterY = gridY + (row + 0.5) * GRID_CONFIG.CELL_SIZE;
+
+            // Calculate distance from pointer to cell center
+            const distance = Math.sqrt(
+              Math.pow(x - cellCenterX, 2) + Math.pow(y - cellCenterY, 2)
+            );
+
+            // Only include cells within the influence radius
+            return distance <= GRID_CONFIG.POINTER_INFLUENCE_RADIUS
+              ? cell
+              : undefined;
+          } catch {
+            return undefined;
+          }
+        })
+      ).flat()
+    );
+
+    // Highlight the cells that are not already highlighted
+    numberManager.highlightNumbers(cellsInRadius);
+  }, [numberManager, pointerManager]);
+
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -45,7 +120,31 @@ export function NumberGrid() {
         "ArrowRight",
       ].includes(e.key);
 
-      if (!isArrowKey) return;
+      const isActionKey = e.key === " " || e.key === "Enter";
+
+      const isBinNumberKey = ["1", "2", "3", "4", "5"].includes(e.key);
+
+      if (!isArrowKey && !isActionKey && !isBinNumberKey) return;
+
+      // Prevent default behavior for these keys
+      e.preventDefault();
+
+      if (isActionKey) {
+        // Trigger highlighting at current pointer position
+        triggerHighlightAtPointer();
+        return;
+      }
+
+      if (isBinNumberKey) {
+        // Trigger put number at current pointer position
+        const binLabel = e.key.padStart(2, "0");
+        const bin = refinementManager.bins.find(
+          (bin) => bin.binId === `bin_${binLabel}`
+        );
+        if (!bin) throw new Error(`Bin ${binLabel} not found`);
+        refinementManager.numberManager.assignHighlightedNumbersToBin(bin);
+        return;
+      }
 
       // Show navigation feedback
       setIsNavigating(true);
@@ -75,8 +174,11 @@ export function NumberGrid() {
           numberManager.moveViewport("right");
           break;
       }
+
+      // Update pointer position to center of viewport after navigation
+      updatePointerToViewportCenter();
     },
-    [numberManager]
+    [numberManager, updatePointerToViewportCenter, triggerHighlightAtPointer]
   );
 
   // Add keyboard event listeners
@@ -85,9 +187,8 @@ export function NumberGrid() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       // Clear any navigation timeout on unmount
-      if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
-      }
+      if (!navigationTimeoutRef.current) return;
+      clearTimeout(navigationTimeoutRef.current);
     };
   }, [handleKeyDown]);
 
