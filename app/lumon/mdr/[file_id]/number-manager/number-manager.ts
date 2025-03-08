@@ -347,7 +347,7 @@ export class NumberManager {
 
     // Get the center position of the bin
     const binBounds = binElement.getBoundingClientRect();
-    const binCenterX = binBounds.x + binBounds.width / 2;
+    const binCenterX = binBounds.x + binBounds.width / 2 - 15;
     const binCenterY = binBounds.y;
 
     // Increment the bin's metrics to start bin's animation:
