@@ -59,11 +59,14 @@ export function PointerInteractionTrap() {
 
             // Skip invalid positions (only check relative bounds)
             if (row < 0 || col < 0) return undefined;
-            if (row > numberManager.maxRow || col > numberManager.maxCol)
+            if (
+              row > numberManager.maxRelativeRow ||
+              col > numberManager.maxRelativeCol
+            )
               return undefined;
 
             try {
-              const cell = numberManager.getNumberForPosition(row, col);
+              const cell = numberManager.getNumberForRelativePosition(row, col);
 
               // Calculate the cell's center position
               const cellCenterX = gridX + (col + 0.5) * GRID_CONFIG.CELL_SIZE;

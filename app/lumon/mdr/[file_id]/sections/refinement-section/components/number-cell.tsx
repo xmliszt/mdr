@@ -90,9 +90,9 @@ export function NumberCell({ cellId }: NumberCellProps) {
     if (gridRect) {
       // Calculate the cell's center position in screen coordinates
       const cellCenterX =
-        gridRect.left + (number.col + 0.5) * GRID_CONFIG.CELL_SIZE;
+        gridRect.left + (number.relativeCol + 0.5) * GRID_CONFIG.CELL_SIZE;
       const cellCenterY =
-        gridRect.top + (number.row + 0.5) * GRID_CONFIG.CELL_SIZE;
+        gridRect.top + (number.relativeRow + 0.5) * GRID_CONFIG.CELL_SIZE;
 
       // Calculate distance from pointer to cell center
       const distanceFromPointer = Math.sqrt(
@@ -186,8 +186,8 @@ export function NumberCell({ cellId }: NumberCellProps) {
   }, [
     number.isHighlighted,
     number.temper,
-    number.row,
-    number.col,
+    number.relativeRow,
+    number.relativeCol,
     pointerManager,
   ]);
 
@@ -230,8 +230,8 @@ export function NumberCell({ cellId }: NumberCellProps) {
           height: GRID_CONFIG.CELL_SIZE,
           // Position the cell in the grid.
           transform: `
-            translateX(${number.col * GRID_CONFIG.CELL_SIZE}px)
-            translateY(${number.row * GRID_CONFIG.CELL_SIZE}px)
+            translateX(${number.relativeCol * GRID_CONFIG.CELL_SIZE}px)
+            translateY(${number.relativeRow * GRID_CONFIG.CELL_SIZE}px)
           `,
           zIndex: 0,
         }}

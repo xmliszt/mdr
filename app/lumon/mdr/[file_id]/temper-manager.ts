@@ -57,32 +57,38 @@ export class TemperManager {
     const randomNumber = numbers[randomIndex];
 
     // Use the relative row and column for the visible cell
-    this._assignTemper(randomNumber.row, randomNumber.col, "none", true);
+    this._assignTemper(randomNumber.relativeRow, randomNumber.relativeCol, "none", true);
   }
 
   private _assignTemper(
-    row: number,
-    col: number,
+    relativeRow: number,
+    relativeCol: number,
     direction: "left" | "right" | "up" | "down" | "none",
     mustChain = false
   ) {
     // Bounds check using relative coordinates (only visible cells)
     if (
-      row < 0 ||
-      row > this._numberManager.maxRow ||
-      col < 0 ||
-      col > this._numberManager.maxCol
+      relativeRow < 0 ||
+      relativeRow > this._numberManager.maxRelativeRow ||
+      relativeCol < 0 ||
+      relativeCol > this._numberManager.maxRelativeCol
     ) {
-      console.warn(`Position out of bounds: (${row}, ${col})`);
+      console.warn(`Position out of bounds: (${relativeRow}, ${relativeCol})`);
       return;
     }
 
     // Get number, handle failure gracefully
-    let number: ReturnType<typeof this._numberManager.getNumberForPosition>;
+    let number: ReturnType<typeof this._numberManager.getNumberForRelativePosition>;
     try {
-      number = this._numberManager.getNumberForPosition(row, col);
+      number = this._numberManager.getNumberForRelativePosition(
+        relativeRow,
+        relativeCol
+      );
     } catch (error) {
-      console.warn(`Skipping temper assignment at (${row}, ${col}):`, error);
+      console.warn(
+        `Skipping temper assignment at (${relativeRow}, ${relativeCol}):`,
+        error
+      );
       return;
     }
 
@@ -91,7 +97,7 @@ export class TemperManager {
     // Assign a random temper
     const tempers = ["WO", "FC", "DR", "MA"] as const;
     const selectedTemper = tempers[Math.floor(Math.random() * tempers.length)];
-    this._numberManager.setTemper(row, col, selectedTemper);
+    this._numberManager.setTemper(relativeRow, relativeCol, selectedTemper);
 
     // Chain to adjacent cells
     const directions = ["left", "right", "up", "down"] as const;
@@ -109,15 +115,15 @@ export class TemperManager {
         mustChain || Math.random() <= TemperManager.CHANCE_OF_CHAIN;
       if (!shouldChain) return;
 
-      const nextRow = row + (d === "up" ? -1 : d === "down" ? 1 : 0);
-      const nextCol = col + (d === "left" ? -1 : d === "right" ? 1 : 0);
+      const nextRow = relativeRow + (d === "up" ? -1 : d === "down" ? 1 : 0);
+      const nextCol = relativeCol + (d === "left" ? -1 : d === "right" ? 1 : 0);
 
       // Only chain to cells that are visible in the viewport
       if (
         nextRow >= 0 &&
-        nextRow <= this._numberManager.maxRow &&
+        nextRow <= this._numberManager.maxRelativeRow &&
         nextCol >= 0 &&
-        nextCol <= this._numberManager.maxCol
+        nextCol <= this._numberManager.maxRelativeCol
       ) {
         // Pass false for mustChain to subsequent calls to avoid forced chaining beyond the first level
         this._assignTemper(nextRow, nextCol, d, false);
