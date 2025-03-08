@@ -6,16 +6,17 @@ import { HeaderSection } from "@/app/lumon/mdr/[file_id]/sections/header-section
 import { RefinementSection } from "@/app/lumon/mdr/[file_id]/sections/refinement-section";
 
 type PageProps = {
-  params: {
+  params: Promise<{
     file_id: string;
-  };
+  }>;
 };
 
-export default function Page(props: PageProps) {
-  if (!FILES[props.params.file_id]) throw new Error("Invalid file");
+export default async function Page(props: PageProps) {
+  const { file_id } = await props.params;
+  if (!FILES[file_id]) throw new Error("Invalid file");
 
   return (
-    <RefinementProvider fileId={props.params.file_id}>
+    <RefinementProvider fileId={file_id}>
       <div className="w-full h-full flex flex-col">
         <HeaderSection />
         <RefinementSection />
