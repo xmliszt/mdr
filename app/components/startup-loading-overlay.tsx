@@ -89,7 +89,7 @@ export function StartupLoadingOverlay() {
     <motion.div
       id="crt-overlay"
       ref={scope}
-      className="fixed inset-0 bg-background z-50 flex overflow-hidden pointer-events-none"
+      className="fixed inset-0 bg-background z-50 flex overflow-hidden pointer-events-none select-none cursor-default"
       initial={{ opacity: 1 }}
     >
       <div className="w-full max-w-4xl p-8 overflow-hidden">
