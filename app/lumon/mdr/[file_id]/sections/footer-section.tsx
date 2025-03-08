@@ -1,5 +1,6 @@
 "use client";
 
+import { SocialLinks } from "@/app/components/social-links";
 import { useEffect } from "react";
 
 import { useState } from "react";
@@ -26,6 +27,7 @@ export function FooterSection() {
       <div className="h-full text-accent  text-lg flex justify-center items-center w-full">
         {serial}
       </div>
+      <SocialLinks className="absolute bottom-4 right-4 [&_svg]:fill-background [&_svg]:stroke-foreground" />
     </div>
   );
 }
