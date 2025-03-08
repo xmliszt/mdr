@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { AnimatePresence, motion } from "framer-motion";
 import { Share2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 type LumonCompleteDialogProps = {
@@ -30,10 +30,10 @@ export function LumonCompleteDialog({
   const [showShareDialog, setShowShareDialog] = useState(false);
   const fileName = FILES[fileId] || "Unknown";
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
     onClose();
-  };
+  }, [onClose]);
 
   // Handle Escape key to close the dialog
   useEffect(() => {
@@ -42,7 +42,7 @@ export function LumonCompleteDialog({
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
+  }, [handleClose]);
 
   // Timer to transition from percentage to video
   useEffect(() => {
