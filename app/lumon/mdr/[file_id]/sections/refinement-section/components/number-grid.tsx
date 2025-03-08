@@ -114,7 +114,7 @@ export function NumberGrid() {
       {/* Graident blur for the edges of the grid */}
       <div
         className={cn(
-          "absolute inset-0 pointer-events-none h-full w-full z-50",
+          "absolute inset-0 pointer-events-none h-full w-full",
           "shadow-[inset_0_0_40px_20px_rgba(0,0,0,0.8)]",
           "backdrop-blur-[10px]"
         )}

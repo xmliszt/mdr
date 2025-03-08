@@ -116,8 +116,7 @@ export function Bin(props: BinProps) {
     <div
       id={props.bin.binId}
       className={cn(
-        "relative w-[140px] shrink-0 h-[70px] border flex flex-col gap-y-2 select-none",
-        "hover:scale-105 transition-all ease-in-out"
+        "relative w-[140px] h-[70px] border flex flex-col gap-y-2 select-none"
       )}
       onClick={props.onClick}
     >
