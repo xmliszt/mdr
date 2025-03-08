@@ -36,20 +36,17 @@ export function InstructionManualModal() {
               <section>
                 <p>
                   As a Macrodata Refiner, it is important to learn the four
-                  different types of numbers you will encounter throughout the
-                  process of refining a data set. Every number will elicit one
-                  of four emotional responses within you, and it is important to
-                  be aware of the four types so that you can more quickly assess
-                  and categorize your emotional response. This will, in turn,
-                  allow you to more quickly sort the numbers into their
-                  appropriate bins.
+                  different tempers you will encounter throughout the process of
+                  refining a data set. Every number will elicit one of four
+                  emotional responses within you, and it is important to be
+                  aware of the four types so that you can more quickly assess
+                  and categorize them. This will, in turn, allow you to more
+                  quickly sort the numbers into their appropriate bins.
                 </p>
               </section>
 
               <section>
-                <h4 className="font-bold text-lg mb-2">
-                  The Four Types of Numbers
-                </h4>
+                <h4 className="font-bold text-lg mb-2">The Four Tempers</h4>
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2">
@@ -126,12 +123,12 @@ export function InstructionManualModal() {
                     highlighted.
                   </li>
                   <li>
-                    Once you have identified a group of numbers that elicit the
-                    same emotional response, direct them to the appropriate bin.
+                    Once you have identified a group of numbers that elicit any
+                    of the four tempers, direct them to the appropriate bin.
                   </li>
                   <li>
                     Continue this process until all five bins are evenly filled
-                    with the four kinds of number clusters.
+                    with the four tempers.
                   </li>
                   <li>
                     When all bins are properly filled, the file will be 100%
@@ -145,39 +142,39 @@ export function InstructionManualModal() {
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>ArrowUp</KeyboardKeyComponent>
-                    <span>Move viewport up</span>
+                    <span>Move up</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>ArrowDown</KeyboardKeyComponent>
-                    <span>Move viewport down</span>
+                    <span>Move down</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>ArrowLeft</KeyboardKeyComponent>
-                    <span>Move viewport left</span>
+                    <span>Move left</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>ArrowRight</KeyboardKeyComponent>
-                    <span>Move viewport right</span>
+                    <span>Move right</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>1</KeyboardKeyComponent>
-                    <span>Select Bin 01</span>
+                    <span>Send to Bin 01</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>2</KeyboardKeyComponent>
-                    <span>Select Bin 02</span>
+                    <span>Send to Bin 02</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>3</KeyboardKeyComponent>
-                    <span>Select Bin 03</span>
+                    <span>Send to Bin 03</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>4</KeyboardKeyComponent>
-                    <span>Select Bin 04</span>
+                    <span>Send to Bin 04</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <KeyboardKeyComponent>5</KeyboardKeyComponent>
-                    <span>Select Bin 05</span>
+                    <span>Send to Bin 05</span>
                   </div>
                   {/* Placeholder for space and enter key */}
                   <div></div>
@@ -244,12 +241,8 @@ export function InstructionManualModal() {
                 <h4 className="font-bold text-lg mb-2">Important Notes</h4>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
-                    Numbers may occasionally change their temper. This is a
-                    normal part of the refinement process.
-                  </li>
-                  <li>
-                    Each bin must be filled evenly with all four types of
-                    numbers for optimal refinement.
+                    Each bin must be filled evenly with all four tempers for
+                    optimal refinement.
                   </li>
                   <li>
                     Trust your emotional response. The numbers know how they
@@ -257,8 +250,8 @@ export function InstructionManualModal() {
                   </li>
                   <li>
                     If you experience any unusual sensations during refinement,
-                    please continue your work. This is a normal part of the
-                    process.
+                    please continue your work. Do not be alarmed as this is a
+                    normal part of the process.
                   </li>
                   <li>
                     Remember that your work as a Macrodata Refiner is vital to
@@ -272,7 +265,7 @@ export function InstructionManualModal() {
                   &ldquo;Remember, the work is mysterious and important.&rdquo;
                 </p>
                 <p className="text-center font-bold mt-2">
-                  Thank you for your service to Lumon Industries.
+                  Thank you for your service at Lumon Industries!
                 </p>
               </div>
             </div>
