@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@next/eslint-plugin-next": "^15.2.0",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-slot": "^1.1.2",
     "@vercel/analytics": "^1.5.0",

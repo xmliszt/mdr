@@ -2,6 +2,8 @@
 
 import { Bin } from "@/app/lumon/mdr/[file_id]/components/bin";
 import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
+import { InstructionManualModal } from "@/app/lumon/mdr/components/instruction-manual-modal";
+import isMobile from "is-mobile";
 
 export function BinSection() {
   const refinementManager = useRefinementManager();
@@ -19,6 +21,13 @@ export function BinSection() {
           />
         ))}
       </div>
+
+      {/* Instruction manual modal */}
+      {!isMobile() && (
+        <div className="absolute bottom-4 right-4">
+          <InstructionManualModal />
+        </div>
+      )}
     </div>
   );
 }

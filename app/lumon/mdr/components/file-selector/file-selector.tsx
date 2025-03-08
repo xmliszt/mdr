@@ -2,6 +2,7 @@
 
 import { LumonLink } from "@/app/components/lumon-link";
 import { FILES } from "@/app/lumon/mdr/[file_id]/files";
+import { InstructionManualModal } from "@/app/lumon/mdr/components/instruction-manual-modal";
 import {
   FileProgressSummary,
   ProgressRetriever,
@@ -379,9 +380,14 @@ export function FileSelector() {
         </div>
       )}
 
-      {/* Top left link */}
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+      {/* Top link */}
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2">
         <LumonLink redirect="/" />
+      </div>
+
+      {/* Top instruction manual */}
+      <div className="absolute top-8 right-8">
+        <InstructionManualModal />
       </div>
     </div>
   );

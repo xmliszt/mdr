@@ -1,5 +1,6 @@
 import { NumberGrid } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/components/number-grid";
 import { PointerInteractionTrap } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/pointer-interaction-trap";
+
 export function RefinementSection() {
   return (
     <div className="relative flex-1 w-full flex items-center justify-center">

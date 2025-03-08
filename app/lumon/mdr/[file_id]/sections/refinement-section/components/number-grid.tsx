@@ -178,7 +178,13 @@ export function NumberGrid() {
       // Update pointer position to center of viewport after navigation
       updatePointerToViewportCenter();
     },
-    [numberManager, updatePointerToViewportCenter, triggerHighlightAtPointer]
+    [
+      updatePointerToViewportCenter,
+      triggerHighlightAtPointer,
+      refinementManager.bins,
+      refinementManager.numberManager,
+      numberManager,
+    ]
   );
 
   // Add keyboard event listeners
