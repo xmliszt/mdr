@@ -13,9 +13,9 @@ type LayoutProps = {
 
 export default function RootLayout(props: LayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
-        <main className="min-h-screen">{props.children}</main>
+    <html lang="en" className="w-full h-full" suppressHydrationWarning>
+      <body className="antialiased w-full h-full">
+        <main className="w-full h-full">{props.children}</main>
         <Analytics />
       </body>
     </html>

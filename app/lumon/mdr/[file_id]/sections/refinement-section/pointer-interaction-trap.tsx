@@ -3,11 +3,15 @@
 import { useRefinementManager } from "@/app/lumon/mdr/[file_id]/refinement-provider";
 import { GRID_CONFIG } from "@/app/lumon/mdr/[file_id]/sections/refinement-section/grid-config";
 import { compact, throttle } from "lodash";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function PointerInteractionTrap() {
   const refinementManager = useRefinementManager();
   const { numberManager, pointerManager } = refinementManager;
+  const [touchStartPosition, setTouchStartPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Update grid rect on mount and when window resizes
   useEffect(() => {
@@ -95,9 +99,9 @@ export function PointerInteractionTrap() {
     [numberManager, pointerManager]
   );
 
-  // Handle pointer move to update pointer position
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+  // Handle mouse move to update pointer position
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
       // Update the pointer position in the store
       pointerManager.updatePointerPosition(e.clientX, e.clientY);
     },
@@ -105,15 +109,15 @@ export function PointerInteractionTrap() {
   );
 
   // Use useMemo to create a stable throttled function
-  const throttledPointerMove = useMemo(
-    () => throttle(handlePointerMove, 16), // ~60fps
-    [handlePointerMove]
+  const throttledMouseMove = useMemo(
+    () => throttle(handleMouseMove, 16), // ~60fps
+    [handleMouseMove]
   );
 
   // Clean up the throttled function on unmount
   useEffect(() => {
-    return () => throttledPointerMove.cancel();
-  }, [throttledPointerMove]);
+    return () => throttledMouseMove.cancel();
+  }, [throttledMouseMove]);
 
   const handleOnClick = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) =>
@@ -121,11 +125,89 @@ export function PointerInteractionTrap() {
     [highlightCellsInRadius]
   );
 
+  // Handle touch start for swipe detection
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (e.touches.length === 1) {
+        setTouchStartPosition({
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        });
+      }
+    },
+    []
+  );
+
+  // Handle touch end for swipe detection
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!touchStartPosition) return;
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+
+      const deltaX = touchEndX - touchStartPosition.x;
+      const deltaY = touchEndY - touchStartPosition.y;
+
+      // Minimum distance to be considered a swipe
+      const minSwipeDistance = 50;
+
+      // Determine swipe direction
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          if (deltaX > 0) {
+            numberManager.moveViewport("left");
+          } else {
+            numberManager.moveViewport("right");
+          }
+        }
+      } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          if (deltaY > 0) {
+            numberManager.moveViewport("down");
+          } else {
+            numberManager.moveViewport("up");
+          }
+        }
+      }
+
+      setTouchStartPosition(null);
+    },
+    [touchStartPosition, numberManager]
+  );
+
+  // Handle touch move for updating pointer position
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        pointerManager.updatePointerPosition(touch.clientX, touch.clientY);
+      }
+    },
+    [pointerManager]
+  );
+
+  // Create throttled touch move handler
+  const throttledTouchMove = useMemo(
+    () => throttle(handleTouchMove, 16), // ~60fps
+    [handleTouchMove]
+  );
+
+  // Clean up the throttled touch move function on unmount
+  useEffect(() => {
+    return () => throttledTouchMove.cancel();
+  }, [throttledTouchMove]);
+
   return (
     <div
       className="absolute inset-0 w-full h-full z-[9999] opacity-0"
       onClick={handleOnClick}
-      onPointerMove={throttledPointerMove}
+      onMouseMove={throttledMouseMove}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={throttledTouchMove}
     />
   );
 }
