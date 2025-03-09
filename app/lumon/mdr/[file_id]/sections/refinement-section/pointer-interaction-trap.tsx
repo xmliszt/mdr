@@ -166,9 +166,9 @@ export function PointerInteractionTrap() {
         // Vertical swipe
         if (Math.abs(deltaY) > minSwipeDistance) {
           if (deltaY > 0) {
-            numberManager.moveViewport("down");
-          } else {
             numberManager.moveViewport("up");
+          } else {
+            numberManager.moveViewport("down");
           }
         }
       }
