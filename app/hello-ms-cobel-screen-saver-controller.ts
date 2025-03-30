@@ -10,7 +10,6 @@ import { useEffect } from "react";
 class HelloMsCobelScreenSaverController {
   private timeoutId: number | null = null;
   private readonly inactivityTimeout: number;
-  private isEnabled: boolean = false;
 
   /**
    * Creates a new controller for the Hello Ms. Cobel screensaver
@@ -28,9 +27,6 @@ class HelloMsCobelScreenSaverController {
    * Enables the screensaver to be shown after inactivity
    */
   public enable(): void {
-    if (this.isEnabled) return;
-
-    this.isEnabled = true;
     this.resetTimer();
 
     // Add event listeners to detect user activity
@@ -46,9 +42,6 @@ class HelloMsCobelScreenSaverController {
    * Disables the screensaver
    */
   public disable(): void {
-    if (!this.isEnabled) return;
-
-    this.isEnabled = false;
     this.clearTimer();
 
     // Remove event listeners
@@ -76,22 +69,23 @@ class HelloMsCobelScreenSaverController {
   private resetTimer(): void {
     this.clearTimer();
 
-    if (this.isEnabled && typeof window !== "undefined") {
-      this.timeoutId = window.setTimeout(
-        () => helloMsCobelScreenSaver.show(),
-        this.inactivityTimeout
-      );
-    }
+    if (typeof window === "undefined") return;
+
+    this.timeoutId = window.setTimeout(
+      () => helloMsCobelScreenSaver.show(),
+      this.inactivityTimeout
+    );
   }
 
   /**
    * Clears the inactivity timer
    */
   private clearTimer(): void {
-    if (this.timeoutId !== null && typeof window !== "undefined") {
-      window.clearTimeout(this.timeoutId);
-      this.timeoutId = null;
-    }
+    if (this.timeoutId === null) return;
+    if (typeof window === "undefined") return;
+
+    window.clearTimeout(this.timeoutId);
+    this.timeoutId = null;
   }
 }
 
@@ -101,7 +95,7 @@ class HelloMsCobelScreenSaverController {
 export function HelloMsCobelScreenSaverControllerComponent() {
   useEffect(() => {
     const controller = new HelloMsCobelScreenSaverController({
-      inactivityTimeoutMs: 60 * 1000, // 1 minute
+      inactivityTimeoutMs: 30 * 1000, // 30 seconds
     });
     controller.enable();
     return () => controller.disable();

@@ -57,8 +57,8 @@ export default function RootLayout(props: LayoutProps) {
       <body className="antialiased w-full h-full">
         <main className="w-full h-full">{props.children}</main>
         <StartupLoadingOverlay />
-        <Analytics />
         <HelloMsCobelScreenSaverControllerComponent />
+        <Analytics />
       </body>
     </html>
   );

@@ -384,8 +384,8 @@ export function FileSelector() {
       {/* Bottom instructions */}
       {!isMobile() && (
         <div className="absolute bottom-4 px-4 left-0 right-0 text-center text-foreground text-opacity-80 py-2">
-          Use mouse wheel or arrow keys to navigate. Press Enter to select.
-          Press Escape to deselect.
+          Use mouse or arrow keys to navigate. Press <kbd>{`<Enter>`}</kbd> to
+          select. Press <kbd>{`<Escape>`}</kbd> to deselect.
         </div>
       )}
 
