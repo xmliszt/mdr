@@ -51,6 +51,7 @@ const charVariants = {
     },
   }),
 };
+
 // Screensaver component that displays "Hello Ms. Cobel" in Severance style
 type HelloMsCobelScreensaverComponentProps = {
   onClose: () => void;
@@ -87,11 +88,11 @@ function HelloMsCobelScreensaverComponent({
     const totalEntryTime = LINE.length * 200 + 3000; // delay before exit starts
     const exitTimer = setTimeout(() => {
       setTextToShow(undefined);
+
       // After exit animation completes, reset the flag so we will loop the animation
-      const resetTimer = setTimeout(
-        () => setTextToShow(textToShow),
-        totalEntryTime
-      );
+      const resetTimer = setTimeout(() => {
+        setTextToShow(LINE);
+      }, totalEntryTime);
 
       return () => clearTimeout(resetTimer);
     }, totalEntryTime);
@@ -104,6 +105,12 @@ function HelloMsCobelScreensaverComponent({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="fixed inset-0 z-[10000] bg-background flex items-center justify-center"
+      onMouseMove={(event) => event.stopPropagation()}
+      onTouchMove={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
+      onTouchStart={(event) => event.stopPropagation()}
+      onScroll={(event) => event.stopPropagation()}
     >
       <AnimatePresence>
         {typeof textToShow === "string" && (
@@ -123,6 +130,7 @@ function HelloMsCobelScreensaverComponent({
                 key={charOrder}
                 variants={charVariants}
                 custom={charOrder}
+                className="select-none"
               >
                 {char === " " ? "\u00A0" : char}
               </motion.div>

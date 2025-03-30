@@ -34,13 +34,12 @@ class HelloMsCobelScreenSaverController {
     this.resetTimer();
 
     // Add event listeners to detect user activity
-    if (typeof window !== "undefined") {
-      window.addEventListener("mousemove", this.handleUserActivity);
-      window.addEventListener("mousedown", this.handleUserActivity);
-      window.addEventListener("keypress", this.handleUserActivity);
-      window.addEventListener("touchstart", this.handleUserActivity);
-      window.addEventListener("scroll", this.handleUserActivity);
-    }
+    if (typeof window === "undefined") return;
+    window.addEventListener("mousemove", this.handleUserActivity);
+    window.addEventListener("mousedown", this.handleUserActivity);
+    window.addEventListener("keypress", this.handleUserActivity);
+    window.addEventListener("touchstart", this.handleUserActivity);
+    window.addEventListener("scroll", this.handleUserActivity);
   }
 
   /**
@@ -53,13 +52,12 @@ class HelloMsCobelScreenSaverController {
     this.clearTimer();
 
     // Remove event listeners
-    if (typeof window !== "undefined") {
-      window.removeEventListener("mousemove", this.handleUserActivity);
-      window.removeEventListener("mousedown", this.handleUserActivity);
-      window.removeEventListener("keypress", this.handleUserActivity);
-      window.removeEventListener("touchstart", this.handleUserActivity);
-      window.removeEventListener("scroll", this.handleUserActivity);
-    }
+    if (typeof window === "undefined") return;
+    window.removeEventListener("mousemove", this.handleUserActivity);
+    window.removeEventListener("mousedown", this.handleUserActivity);
+    window.removeEventListener("keypress", this.handleUserActivity);
+    window.removeEventListener("touchstart", this.handleUserActivity);
+    window.removeEventListener("scroll", this.handleUserActivity);
 
     // Hide screensaver if it's currently shown
     helloMsCobelScreenSaver.hide();
@@ -79,9 +77,10 @@ class HelloMsCobelScreenSaverController {
     this.clearTimer();
 
     if (this.isEnabled && typeof window !== "undefined") {
-      this.timeoutId = window.setTimeout(() => {
-        helloMsCobelScreenSaver.show();
-      }, this.inactivityTimeout);
+      this.timeoutId = window.setTimeout(
+        () => helloMsCobelScreenSaver.show(),
+        this.inactivityTimeout
+      );
     }
   }
 
