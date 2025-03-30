@@ -1,5 +1,6 @@
 import { StartupLoadingOverlay } from "@/app/components/startup-loading-overlay";
 import "@/app/globals.css";
+import { HelloMsCobelScreenSaverControllerComponent } from "@/app/hello-ms-cobel-screen-saver-controller";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 
@@ -57,6 +58,7 @@ export default function RootLayout(props: LayoutProps) {
         <main className="w-full h-full">{props.children}</main>
         <StartupLoadingOverlay />
         <Analytics />
+        <HelloMsCobelScreenSaverControllerComponent />
       </body>
     </html>
   );
