@@ -118,9 +118,15 @@ export function LumonCompleteDialog({
 
 export const lumonCompleteDialog = {
   show: (fileId: string) => {
+    // If the dialog is already open, do nothing
+    if (document.getElementById("lumon-complete-dialog-container")) return;
+
+    // Create the container element
     const container = document.createElement("div");
     container.id = "lumon-complete-dialog-container";
     document.body.appendChild(container);
+
+    // Create the root element
     const root = createRoot(container);
     root.render(
       <LumonCompleteDialog
