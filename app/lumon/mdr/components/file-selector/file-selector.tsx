@@ -389,11 +389,6 @@ export function FileSelector() {
         </div>
       )}
 
-      {/* Top link */}
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-        <LumonLink redirect="/" />
-      </div>
-
       {/* Top instruction manual */}
       <div
         className={cn(
@@ -403,6 +398,11 @@ export function FileSelector() {
       >
         <ProgressImporterExporter />
         <InstructionManualModal />
+      </div>
+
+      {/* Top link */}
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+        <LumonLink redirect="/" />
       </div>
     </div>
   );
