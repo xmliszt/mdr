@@ -295,6 +295,8 @@ export class NumberManager {
   }
 
   private _assigningBins: { [binId: string]: boolean } = {};
+  // Add new private map to track numbers being assigned
+  private _numbersBeingAssigned: Set<string> = new Set();
 
   get isAllNumbersComplete() {
     const bins = this._refinementManager.bins;
@@ -352,11 +354,20 @@ export class NumberManager {
       return;
     }
 
+    // If any of the numbers being assigned are already being assigned, do nothing
+    if (highlightedNumbers.some((n) => this._numbersBeingAssigned.has(n.id))) {
+      this.lumonBlockingDialog.show();
+      return;
+    }
+
     // If highlighted numbers have no tempers, do nothing
     if (highlightedNumbers.every((n) => n.temper === undefined)) {
       this.lumonBlockingDialog.show();
       return;
     }
+
+    // Add the numbers being assigned to the set
+    highlightedNumbers.forEach((n) => this._numbersBeingAssigned.add(n.id));
 
     // Get the number cell elements by id
     const numAndCells = compact(
@@ -432,7 +443,11 @@ export class NumberManager {
       setTimeout(() => resolve(), 4000);
     });
 
+    // Reset the bin's metrics
     this._assigningBins[bin.binId] = false;
+
+    // Remove the numbers being assigned from the set
+    highlightedNumbers.forEach((n) => this._numbersBeingAssigned.delete(n.id));
   }
 
   /**
