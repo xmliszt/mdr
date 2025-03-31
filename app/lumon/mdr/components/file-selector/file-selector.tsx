@@ -297,7 +297,7 @@ export function FileSelector() {
                     }}
                   >
                     {/* File name */}
-                    <div className="absolute top-2 left-2 text-neutral-600 text-xs font-mono [text-shadow:none]">
+                    <div className="absolute inset-0 text-neutral-500 text-xs font-mono [text-shadow:none] line-clamp-2 text-center p-2">
                       {file.id}
                     </div>
                   </motion.div>
