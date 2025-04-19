@@ -29,6 +29,10 @@ export const generateMetadata = async ({
       title: `Work at Lumon | MDR - ${FILES[file_id]}`,
       description: `The sacred work of Macro Data Refinement adds glory to Kier and serves all mankind. As a refiner, your contribution upholds the principles that make Lumon Industries exceptional.`,
     },
+    alternates: {
+      ...METADATA.alternates,
+      canonical: `https://www.lumon-industries.work/lumon/mdr/${file_id}`,
+    },
   } satisfies Metadata;
 };
 

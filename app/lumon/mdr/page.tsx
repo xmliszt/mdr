@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     description:
       "Access your assigned Macro Data Refinement files. Identify and sort the numbers that feel scary from those that feel safe. Your work is mysterious and important.",
   },
+  alternates: {
+    ...METADATA.alternates,
+    canonical: "https://www.lumon-industries.work/lumon/mdr",
+  },
 };
 
 export default function Page() {

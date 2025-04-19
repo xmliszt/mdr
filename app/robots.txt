@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://lumon-industries.work/sitemap.xml
+Sitemap: https://www.lumon-industries.work/sitemap.xml
